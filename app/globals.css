@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+      /* 🌑 Background & Foreground */
+      --background: 192 100% 8%;
+      /* Very dark teal */
+      --foreground: 0 0% 100%;
+      /* White */
+  
+      /* 🃏 Card & Popover */
+      --card: 192 100% 10%;
+      /* Slightly lighter dark teal */
+      --card-foreground: 0 0% 100%;
+  
+      --popover: 192 100% 10%;
+      --popover-foreground: 0 0% 100%;
+  
+      /* 🎯 Primary (Teal Green) */
+      --primary: 152 65% 48%;
+      /* Bright emerald/green */
+      --primary-foreground: 0 0% 100%;
+  
+      /* 🟦 Secondary (Light Blue) */
+      --secondary: 190 49% 67%;
+      --secondary-foreground: 192 100% 12%;
+  
+      /* 🎨 Muted + Accent (Same as Secondary for now) */
+      --muted: 190 49% 67%;
+      --muted-foreground: 192 100% 12%;
+      --accent: 84 61% 45%;
+      /* Slight green-yellow for accent */
+      --accent-foreground: 0 0% 100%;
+  
+      /* 🚨 Destructive (Maroon) */
+      --destructive: 0 100% 25%;
+      --destructive-foreground: 0 0% 100%;
+  
+      /* 🧱 Border, Input, Ring */
+      --border: 192 100% 15%;
+      --input: 192 100% 15%;
+      --ring: 152 65% 48%;
+  
+      /* 🧩 Radius values */
+      --radius: 0.75rem;
+    }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(circle at 20% 80%, hsl(190 100% 50% / 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, hsl(262 83% 67% / 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, hsl(330 81% 70% / 0.05) 0%, transparent 50%);
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl shadow-2xl;
+  }
+
+  .neon-border {
+    @apply border-2 border-transparent bg-gradient-to-r from-[#84c8d4] via-[#27ba55] to-[#e4d406] bg-clip-border;
+  }
+
+  .cyber-grid {
+    background-image: linear-gradient(rgba(0, 212, 255, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 212, 255, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-[#84c8d4] via-[#27ba55] to-[#e4d406] bg-clip-text text-transparent;
+  }
+
+  .hover-glow {
+    transition: all 0.3s ease;
+  }
+
+  .hover-glow:hover {
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+    transform: translateY(-2px);
+  }
+}
+
+    /* brand: {
+      teal: "#00343d",
+        green: "#27ba55",
+        black: "#000000",
+        white: "#ffffff",
+    }
+  
+    ,
+    highlight: {
+      blue: "#84c8d4",
+        yellow: "#e4d406",
+        maroon: "#800000",
+    }
+  
+    , */
