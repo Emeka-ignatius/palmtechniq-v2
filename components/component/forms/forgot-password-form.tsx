@@ -1,6 +1,6 @@
 "use client";
 
-import { forgotPassword } from "@/app/actions/auth";
+import { forgotPassword } from "@/actions/auth";
 import FormError from "@/components/shared/form-error";
 import FormSuccess from "@/components/shared/form-success";
 import { Button } from "@/components/ui/button";
@@ -45,9 +45,9 @@ export function ForgotPasswordForm({ email }: ForgotPasswordProps) {
     if (!email) return "";
     const [localPart, domain] = email.split("@");
     if (localPart.length <= 2) return email;
-    return `${localPart.substring(0, 2)}${"*".repeat(
+    return `₦{localPart.substring(0, 2)}₦{"*".repeat(
       localPart.length - 2
-    )}@${domain}`;
+    )}@₦{domain}`;
   };
 
   const onSubmit = async (data: z.infer<typeof forgotPasswordSchema>) => {
@@ -60,7 +60,7 @@ export function ForgotPasswordForm({ email }: ForgotPasswordProps) {
           setError(data?.error);
         }
         if (data.success) {
-          // setSuccess();
+          setSuccess(data.success);
           form.reset();
         }
       });

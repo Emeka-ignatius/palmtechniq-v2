@@ -3,8 +3,11 @@ import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Github from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
-import getUserByEmail from "./data/user";
+import getUserByEmail, { getUserById } from "./data/user";
 import { loginSchema } from "./schemas";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { db } from "./lib/db";
+import { onBoardingMail } from "./lib/mail";
 
 export default {
   providers: [
@@ -34,4 +37,126 @@ export default {
       },
     }),
   ],
+
+  pages: {
+    signIn: "/login",
+    error: "/error",
+  },
+  events: {
+    async linkAccount({ user }) {
+      await db.user.update({
+        where: { id: user.id },
+        data: { emailVerified: new Date() },
+      });
+    },
+  },
+  callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider !== "credentials") {
+        const existingUser = await getUserByEmail(user.email!);
+
+        if (!existingUser) {
+          await onBoardingMail(user.email!, user.name || "");
+        }
+
+        return true;
+      }
+
+      // Handle credentials sign in
+      const existingUser = await getUserById(user.id!);
+
+      if (!existingUser?.emailVerified) return false;
+
+      return true;
+    },
+
+    // This jwt callback is essential for the middleware
+    async jwt({ token, user, account }) {
+      if (account && user) {
+        token.sub = user.id;
+        token.email = user.email;
+        token.role = user.role;
+      }
+
+      // Ensure role persists across token refreshes
+      if (!token.role && token.sub) {
+        try {
+          const dbUser = await getUserById(token.sub);
+          if (dbUser?.role) {
+            token.role = dbUser.role;
+          }
+        } catch (error) {
+          console.error("Error fetching user role in JWT callback:", error);
+        }
+      }
+
+      // Token expiration handling
+      const now = Math.floor(Date.now() / 1000);
+      const maxAge = 86400; // 24 hours
+
+      if (!token.exp || token.exp < now) {
+        token.exp = now + maxAge;
+      }
+
+      // console.log("JWT callback result:", {
+      //   tokenSub: token.sub,
+      //   tokenRole: token.role,
+      //   tokenEmail: token.email,
+      // });
+
+      return token;
+    },
+
+    async session({ session, token }) {
+      // console.log("Session callback triggered", {
+      //   tokenId: token.sub,
+      //   tokenRole: token.role,
+      //   sessionUser: session.user,
+      // });
+
+      if (token.sub && session.user) {
+        session.user.id = token.sub;
+      }
+
+      if (token.role && session.user) {
+        session.user.role = token.role as string;
+      }
+
+      // Add role to top-level session for middleware
+      if (token.role) {
+        session.role = token.role as string;
+      }
+
+      // console.log("Session callback result:", {
+      //   userId: session.user?.id,
+      //   userRole: session.user?.role,
+      //   sessionRole: session.role,
+      // });
+
+      return session;
+    },
+  },
+
+  adapter: PrismaAdapter(db),
+  session: {
+    maxAge: 86400, // 24 hours
+    strategy: "jwt",
+    updateAge: 300, // Update JWT every 5 minutes
+  },
+
+  cookies: {
+    sessionToken: {
+      name: "authjs.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+        // domain:
+        //   process.env.NODE_ENV === "production"
+        //     ? ".www.palmtechniq.com"
+        //     : undefined,
+      },
+    },
+  },
 } satisfies NextAuthConfig;

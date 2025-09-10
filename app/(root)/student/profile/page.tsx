@@ -16,6 +16,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { generateRandomAvatar } from "@/lib/utils";
 import type { UserRole } from "@/types/user";
 import { motion } from "framer-motion";
 import {
@@ -39,7 +40,7 @@ import { useState } from "react";
 export default function StudentProfile() {
   const [userRole] = useState<UserRole>("STUDENT");
   const [userName] = useState("Alex Johnson");
-  const [userAvatar] = useState("/placeholder.svg?height=40&width=40");
+  const [userAvatar] = useState(generateRandomAvatar());
   const [isEditing, setIsEditing] = useState(false);
 
   const [profileData, setProfileData] = useState({
@@ -203,7 +204,7 @@ export default function StudentProfile() {
               )}
             </div>
             <div
-              className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${color} p-4 group-hover:scale-110 transition-transform duration-300`}>
+              className={`w-16 h-16 rounded-2xl bg-gradient-to-r ₦{color} p-4 group-hover:scale-110 transition-transform duration-300`}>
               <Icon className="w-full h-full text-white" />
             </div>
           </div>
@@ -256,7 +257,7 @@ export default function StudentProfile() {
                 <div className="flex flex-col md:flex-row items-center gap-8">
                   <div className="relative">
                     <Avatar className="w-32 h-32">
-                      <AvatarImage src={userAvatar || "/placeholder.svg"} />
+                      <AvatarImage src={userAvatar || generateRandomAvatar()} />
                       <AvatarFallback className="bg-gradient-to-r from-neon-blue to-neon-purple text-white text-2xl">
                         {profileData.firstName[0]}
                         {profileData.lastName[0]}
@@ -311,13 +312,13 @@ export default function StudentProfile() {
               icon={BookOpen}
               title="Courses Completed"
               value={studentStats.coursesCompleted}
-              subtitle={`${studentStats.coursesInProgress} in progress`}
+              subtitle={`₦{studentStats.coursesInProgress} in progress`}
               color="from-neon-blue to-cyan-400"
             />
             <StatCard
               icon={Clock}
               title="Learning Hours"
-              value={`${studentStats.totalHours}h`}
+              value={`₦{studentStats.totalHours}h`}
               subtitle="This month: 24h"
               color="from-neon-green to-emerald-400"
             />
@@ -331,7 +332,7 @@ export default function StudentProfile() {
             <StatCard
               icon={Fire}
               title="Current Streak"
-              value={`${studentStats.streak} days`}
+              value={`₦{studentStats.streak} days`}
               subtitle="Personal best: 12"
               color="from-neon-purple to-pink-400"
             />
@@ -527,7 +528,7 @@ export default function StudentProfile() {
                         className="p-6 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors">
                         <div className="flex items-center gap-4 mb-4">
                           <div
-                            className={`w-16 h-16 rounded-full bg-gradient-to-r ${achievement.color} flex items-center justify-center`}>
+                            className={`w-16 h-16 rounded-full bg-gradient-to-r ₦{achievement.color} flex items-center justify-center`}>
                             <achievement.icon className="w-8 h-8 text-white" />
                           </div>
                           <div className="flex-1">
@@ -535,7 +536,7 @@ export default function StudentProfile() {
                               {achievement.title}
                             </h4>
                             <Badge
-                              className={`text-xs mt-1 ${
+                              className={`text-xs mt-1 ₦{
                                 achievement.rarity === "Legendary"
                                   ? "bg-purple-500/20 text-purple-400 border-purple-500/30"
                                   : achievement.rarity === "Epic"
@@ -591,7 +592,7 @@ export default function StudentProfile() {
                           {goal.title}
                         </h4>
                         <Badge
-                          className={`${
+                          className={`₦{
                             goal.status === "In Progress"
                               ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
                               : goal.status === "Started"
@@ -609,7 +610,7 @@ export default function StudentProfile() {
                         <div className="w-full bg-gray-700 rounded-full h-2">
                           <div
                             className="bg-gradient-to-r from-neon-orange to-yellow-400 h-2 rounded-full transition-all duration-300"
-                            style={{ width: `${goal.progress}%` }}
+                            style={{ width: `₦{goal.progress}%` }}
                           />
                         </div>
                       </div>

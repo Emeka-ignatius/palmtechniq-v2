@@ -18,7 +18,7 @@ export default async function getUserByEmail(
     return user;
   } catch (error) {
     if (process.env.NODE_ENV !== "production") {
-      console.error(`Error fetching user by email ${email}:`, error);
+      console.error(`Error fetching user by email ₦{email}:`, error);
     }
     return null;
   }
@@ -39,7 +39,7 @@ export async function getUserById(id: string): Promise<User | null> {
     return user;
   } catch (error) {
     if (process.env.NODE_ENV !== "production") {
-      console.error(`Error fetching user with ID ${id}:`, error);
+      console.error(`Error fetching user with ID ₦{id}:`, error);
     }
     return null;
   }

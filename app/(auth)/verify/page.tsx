@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-import { verifyEmail } from "@/app/actions/auth";
+import { verifyEmail } from "@/actions/auth";
 
 export default function VerifyEmailPage() {
   const [isVerifying, setIsVerifying] = useState(false);
@@ -36,7 +36,7 @@ export default function VerifyEmailPage() {
         title: "Success",
         description: "Email verified! Redirecting to login...",
       });
-      setTimeout(() => router.push("/auth/login"), 2000);
+      setTimeout(() => router.push("/login"), 2000);
     }
 
     setIsVerifying(false);

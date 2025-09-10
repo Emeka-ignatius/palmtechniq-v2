@@ -1,12 +1,21 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Play, Pause, CheckCircle, Circle, ArrowRight, BookOpen, Clock, Users } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import { Badge } from "@/components/ui/badge"
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Play,
+  Pause,
+  CheckCircle,
+  Circle,
+  ArrowRight,
+  BookOpen,
+  Clock,
+  Users,
+} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 
 const demoContent = {
   title: "React Hooks Mastery",
@@ -50,41 +59,41 @@ const demoContent = {
     ],
     correct: 1,
   },
-}
+};
 
 export function InteractiveDemo() {
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [showQuiz, setShowQuiz] = useState(false)
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
-  const [showResult, setShowResult] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [showQuiz, setShowQuiz] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [showResult, setShowResult] = useState(false);
 
-  const progress = 65 // Demo progress
+  const progress = 65; // Demo progress
 
   const handlePlayPause = () => {
-    setIsPlaying(!isPlaying)
+    setIsPlaying(!isPlaying);
     if (!isPlaying) {
       // Simulate video progress
       const interval = setInterval(() => {
         setCurrentTime((prev) => {
           if (prev >= 100) {
-            clearInterval(interval)
-            setIsPlaying(false)
-            setShowQuiz(true)
-            return 100
+            clearInterval(interval);
+            setIsPlaying(false);
+            setShowQuiz(true);
+            return 100;
           }
-          return prev + 2
-        })
-      }, 100)
+          return prev + 2;
+        });
+      }, 100);
     }
-  }
+  };
 
   const handleQuizAnswer = (index: number) => {
-    setSelectedAnswer(index)
+    setSelectedAnswer(index);
     setTimeout(() => {
-      setShowResult(true)
-    }, 500)
-  }
+      setShowResult(true);
+    }, 500);
+  };
 
   return (
     <section className="py-32 relative overflow-hidden">
@@ -110,13 +119,14 @@ export function InteractiveDemo() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mb-20"
-        >
+          className="text-center mb-20">
           <h2 className="text-5xl md:text-6xl font-bold mb-6">
-            <span className="text-white">Experience</span> <span className="text-gradient">Learning</span>
+            <span className="text-white">Experience</span>{" "}
+            <span className="text-gradient">Learning</span>
           </h2>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Take a peek inside our revolutionary learning platform. Try it yourself!
+            Take a peek inside our revolutionary learning platform. Try it
+            yourself!
           </p>
         </motion.div>
 
@@ -129,8 +139,7 @@ export function InteractiveDemo() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="lg:col-span-2"
-            >
+              className="lg:col-span-2">
               <Card className="glass-card border-white/10 overflow-hidden">
                 <CardContent className="p-0">
                   {/* Video Area */}
@@ -151,8 +160,7 @@ export function InteractiveDemo() {
                       onClick={handlePlayPause}
                       className="w-20 h-20 rounded-full bg-gradient-to-r from-neon-blue to-neon-purple flex items-center justify-center hover-glow group"
                       whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
+                      whileTap={{ scale: 0.95 }}>
                       {isPlaying ? (
                         <Pause className="w-8 h-8 text-white" />
                       ) : (
@@ -162,7 +170,10 @@ export function InteractiveDemo() {
 
                     {/* Progress Bar */}
                     <div className="absolute bottom-4 left-4 right-4">
-                      <Progress value={currentTime} className="h-2 bg-white/20" />
+                      <Progress
+                        value={currentTime}
+                        className="h-2 bg-white/20"
+                      />
                     </div>
                   </div>
 
@@ -170,8 +181,12 @@ export function InteractiveDemo() {
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div>
-                        <h3 className="text-2xl font-bold text-white mb-2">{demoContent.title}</h3>
-                        <p className="text-gray-400">by {demoContent.instructor}</p>
+                        <h3 className="text-2xl font-bold text-white mb-2">
+                          {demoContent.title}
+                        </h3>
+                        <p className="text-gray-400">
+                          by {demoContent.instructor}
+                        </p>
                       </div>
                       <div className="flex items-center space-x-4 text-sm text-gray-400">
                         <div className="flex items-center">
@@ -188,8 +203,12 @@ export function InteractiveDemo() {
                     {/* Course Progress */}
                     <div className="mb-4">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-gray-400">Course Progress</span>
-                        <span className="text-sm text-neon-blue font-semibold">{progress}%</span>
+                        <span className="text-sm text-gray-400">
+                          Course Progress
+                        </span>
+                        <span className="text-sm text-neon-blue font-semibold">
+                          {progress}%
+                        </span>
                       </div>
                       <Progress value={progress} className="h-2" />
                     </div>
@@ -203,8 +222,7 @@ export function InteractiveDemo() {
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              viewport={{ once: true }}
-            >
+              viewport={{ once: true }}>
               <Card className="glass-card border-white/10 h-full">
                 <CardContent className="p-6">
                   <h4 className="text-xl font-bold text-white mb-6 flex items-center">
@@ -220,14 +238,13 @@ export function InteractiveDemo() {
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: index * 0.1 }}
                         viewport={{ once: true }}
-                        className={`p-4 rounded-xl border transition-all duration-300 cursor-pointer ${
+                        className={`p-4 rounded-xl border transition-all duration-300 cursor-pointer ₦{
                           lesson.current
                             ? "border-neon-blue/50 bg-neon-blue/10"
                             : lesson.completed
                               ? "border-neon-green/30 bg-neon-green/5"
                               : "border-white/10 bg-white/5 hover:border-white/20"
-                        }`}
-                      >
+                        }`}>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center">
                             {lesson.completed ? (
@@ -236,11 +253,19 @@ export function InteractiveDemo() {
                               <Circle className="w-5 h-5 text-gray-400 mr-3" />
                             )}
                             <div>
-                              <p className="text-white font-medium">{lesson.title}</p>
-                              <p className="text-gray-400 text-sm">{lesson.duration}</p>
+                              <p className="text-white font-medium">
+                                {lesson.title}
+                              </p>
+                              <p className="text-gray-400 text-sm">
+                                {lesson.duration}
+                              </p>
                             </div>
                           </div>
-                          {lesson.current && <Badge className="bg-neon-blue text-white">Current</Badge>}
+                          {lesson.current && (
+                            <Badge className="bg-neon-blue text-white">
+                              Current
+                            </Badge>
+                          )}
                         </div>
                       </motion.div>
                     ))}
@@ -258,12 +283,15 @@ export function InteractiveDemo() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -50 }}
                 transition={{ duration: 0.8 }}
-                className="mt-8"
-              >
+                className="mt-8">
                 <Card className="glass-card border-white/10 max-w-4xl mx-auto">
                   <CardContent className="p-8">
-                    <h4 className="text-2xl font-bold text-white mb-6 text-center">Quick Knowledge Check</h4>
-                    <p className="text-xl text-gray-300 mb-8 text-center">{demoContent.quiz.question}</p>
+                    <h4 className="text-2xl font-bold text-white mb-6 text-center">
+                      Quick Knowledge Check
+                    </h4>
+                    <p className="text-xl text-gray-300 mb-8 text-center">
+                      {demoContent.quiz.question}
+                    </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                       {demoContent.quiz.options.map((option, index) => (
@@ -271,7 +299,7 @@ export function InteractiveDemo() {
                           key={index}
                           onClick={() => handleQuizAnswer(index)}
                           disabled={selectedAnswer !== null}
-                          className={`p-4 rounded-xl border text-left transition-all duration-300 ${
+                          className={`p-4 rounded-xl border text-left transition-all duration-300 ₦{
                             selectedAnswer === index
                               ? index === demoContent.quiz.correct
                                 ? "border-neon-green bg-neon-green/20 text-neon-green"
@@ -280,9 +308,12 @@ export function InteractiveDemo() {
                                 ? "border-neon-green bg-neon-green/20 text-neon-green"
                                 : "border-white/20 bg-white/5 text-white hover:border-neon-blue/50 hover:bg-neon-blue/10"
                           }`}
-                          whileHover={{ scale: selectedAnswer === null ? 1.02 : 1 }}
-                          whileTap={{ scale: selectedAnswer === null ? 0.98 : 1 }}
-                        >
+                          whileHover={{
+                            scale: selectedAnswer === null ? 1.02 : 1,
+                          }}
+                          whileTap={{
+                            scale: selectedAnswer === null ? 0.98 : 1,
+                          }}>
                           {option}
                         </motion.button>
                       ))}
@@ -292,17 +323,20 @@ export function InteractiveDemo() {
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-center"
-                      >
+                        className="text-center">
                         {selectedAnswer === demoContent.quiz.correct ? (
                           <div className="text-neon-green">
                             <CheckCircle className="w-12 h-12 mx-auto mb-4" />
-                            <p className="text-xl font-semibold">Excellent! You got it right!</p>
+                            <p className="text-xl font-semibold">
+                              Excellent! You got it right!
+                            </p>
                           </div>
                         ) : (
                           <div className="text-red-400">
                             <Circle className="w-12 h-12 mx-auto mb-4" />
-                            <p className="text-xl font-semibold">Good try! The correct answer is highlighted above.</p>
+                            <p className="text-xl font-semibold">
+                              Good try! The correct answer is highlighted above.
+                            </p>
                           </div>
                         )}
                         <Button className="mt-6 bg-gradient-to-r from-neon-blue to-neon-purple text-white hover-glow">
@@ -319,5 +353,5 @@ export function InteractiveDemo() {
         </div>
       </div>
     </section>
-  )
+  );
 }

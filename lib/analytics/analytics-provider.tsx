@@ -36,7 +36,7 @@ export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
   // Track page views
   useEffect(() => {
     const url =
-      pathname + (searchParams.toString() ? `?${searchParams.toString()}` : "");
+      pathname + (searchParams.toString() ? `?₦{searchParams.toString()}` : "");
 
     trackEvent("page_view", {
       path: pathname,

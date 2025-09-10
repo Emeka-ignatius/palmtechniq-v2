@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import type { UserRole } from "@/types/user";
+import { generateRandomAvatar } from "@/lib/utils";
 
 interface ApplicationData {
   applicationType: "tutor" | "mentor" | "";
@@ -79,7 +80,7 @@ export default function ApplicationPage() {
   const router = useRouter();
   const [userRole] = useState<UserRole>("USER");
   const [userName] = useState("Alex Johnson");
-  const [userAvatar] = useState("/placeholder.svg?height=40&width=40");
+  const [userAvatar] = useState(generateRandomAvatar());
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -281,7 +282,7 @@ export default function ApplicationPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               <motion.div
                 whileHover={{ scale: 1.02, y: -5 }}
-                className={`cursor-pointer ${
+                className={`cursor-pointer ₦{
                   applicationData.applicationType === "tutor"
                     ? "ring-2 ring-neon-blue"
                     : ""
@@ -336,7 +337,7 @@ export default function ApplicationPage() {
 
               <motion.div
                 whileHover={{ scale: 1.02, y: -5 }}
-                className={`cursor-pointer ${
+                className={`cursor-pointer ₦{
                   applicationData.applicationType === "mentor"
                     ? "ring-2 ring-neon-purple"
                     : ""
@@ -933,7 +934,7 @@ export default function ApplicationPage() {
                 </Label>
                 <Textarea
                   id="approach"
-                  placeholder={`Describe your ${
+                  placeholder={`Describe your ₦{
                     applicationData.applicationType === "tutor"
                       ? "teaching"
                       : "mentoring"
@@ -1021,7 +1022,7 @@ export default function ApplicationPage() {
                     className="mt-1 bg-white/10 border-white/20 text-white"
                   />
                   <p className="text-xs text-gray-400 mt-1">
-                    Platform takes 30% commission. You'll earn $
+                    Platform takes 30% commission. You'll earn ₦
                     {((applicationData.teaching.hourlyRate || 0) * 0.7).toFixed(
                       0
                     )}
@@ -1213,7 +1214,7 @@ export default function ApplicationPage() {
                   <div>
                     <span className="text-gray-400">Hourly Rate:</span>
                     <span className="text-white ml-2">
-                      ${applicationData.teaching.hourlyRate}/hour
+                      ₦{applicationData.teaching.hourlyRate}/hour
                     </span>
                   </div>
                 </div>
@@ -1294,7 +1295,7 @@ export default function ApplicationPage() {
                 ].map(({ step, title, icon: Icon }) => (
                   <div
                     key={step}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ₦{
                       currentStep === step
                         ? "bg-neon-blue text-white"
                         : currentStep > step

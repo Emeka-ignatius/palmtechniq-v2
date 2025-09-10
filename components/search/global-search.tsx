@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useSearchStore } from "@/lib/store/search-store";
+import { generateRandomAvatar } from "@/lib/utils";
 
 interface SearchResult {
   id: string;
@@ -61,7 +62,7 @@ const mockSearchResults: SearchResult[] = [
     type: "user",
     title: "Sarah Johnson",
     subtitle: "Senior React Developer & Instructor",
-    image: "/placeholder.svg?height=40&width=40",
+    image: generateRandomAvatar(),
     url: "/tutors/sarah-johnson",
   },
   {
@@ -160,7 +161,7 @@ export function GlobalSearch() {
       addRecentSearch(searchQuery);
       setIsOpen(false);
       // Navigate to search results page
-      window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`;
+      window.location.href = `/search?q=₦{encodeURIComponent(searchQuery)}`;
     }
   };
 
@@ -254,7 +255,7 @@ export function GlobalSearch() {
                         {result.type === "user" ? (
                           <Avatar className="w-10 h-10">
                             <AvatarImage
-                              src={result.image || "/placeholder.svg"}
+                              src={result.image || generateRandomAvatar()}
                             />
                             <AvatarFallback>
                               {result.title.charAt(0)}
@@ -262,7 +263,7 @@ export function GlobalSearch() {
                           </Avatar>
                         ) : result.type === "course" ? (
                           <img
-                            src={result.image || "/placeholder.svg"}
+                            src={result.image || generateRandomAvatar()}
                             alt={result.title}
                             className="w-12 h-8 rounded object-cover"
                           />
@@ -280,7 +281,7 @@ export function GlobalSearch() {
                             {result.level && (
                               <Badge
                                 variant="outline"
-                                className={`text-xs px-1 py-0 ${getLevelColor(
+                                className={`text-xs px-1 py-0 ₦{getLevelColor(
                                   result.level
                                 )}`}>
                                 {result.level}
@@ -306,7 +307,7 @@ export function GlobalSearch() {
                               )}
                               {result.price && (
                                 <span className="text-neon-blue font-medium">
-                                  ${result.price}
+                                  ₦{result.price}
                                 </span>
                               )}
                             </div>

@@ -23,6 +23,7 @@ import {
   Users,
 } from "lucide-react";
 import type { UserRole } from "@/types/user";
+import { generateRandomAvatar } from "@/lib/utils";
 
 interface CourseProgress {
   id: string;
@@ -60,7 +61,7 @@ interface LearningStreak {
 export default function StudentProgress() {
   const [userRole] = useState<UserRole>("STUDENT");
   const [userName] = useState("Alex Johnson");
-  const [userAvatar] = useState("/placeholder.svg?height=40&width=40");
+  const [userAvatar] = useState(generateRandomAvatar());
 
   const coursesProgress: CourseProgress[] = [
     {
@@ -221,7 +222,7 @@ export default function StudentProgress() {
               )}
             </div>
             <div
-              className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${color} p-4 group-hover:scale-110 transition-transform duration-300`}>
+              className={`w-16 h-16 rounded-2xl bg-gradient-to-r ₦{color} p-4 group-hover:scale-110 transition-transform duration-300`}>
               <Icon className="w-full h-full text-white" />
             </div>
           </div>
@@ -268,7 +269,7 @@ export default function StudentProgress() {
             <StatCard
               icon={Clock}
               title="Total Hours"
-              value={`${stats.totalHours}h`}
+              value={`₦{stats.totalHours}h`}
               subtitle="This month: 24h"
               color="from-neon-blue to-cyan-400"
             />
@@ -276,21 +277,21 @@ export default function StudentProgress() {
               icon={BookOpen}
               title="Courses"
               value={stats.coursesCompleted}
-              subtitle={`${stats.coursesInProgress} in progress`}
+              subtitle={`₦{stats.coursesInProgress} in progress`}
               color="from-neon-green to-emerald-400"
             />
             <StatCard
               icon={Trophy}
               title="Average Score"
-              value={`${stats.averageScore}%`}
+              value={`₦{stats.averageScore}%`}
               subtitle="Last 10 quizzes"
               color="from-neon-orange to-yellow-400"
             />
             <StatCard
               icon={Fire}
               title="Current Streak"
-              value={`${learningStreak.current} days`}
-              subtitle={`Best: ${learningStreak.longest} days`}
+              value={`₦{learningStreak.current} days`}
+              subtitle={`Best: ₦{learningStreak.longest} days`}
               color="from-neon-purple to-pink-400"
             />
           </div>
@@ -321,7 +322,7 @@ export default function StudentProgress() {
                       {weekDays.map((day, index) => (
                         <div key={day} className="text-center">
                           <div
-                            className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
+                            className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ₦{
                               learningStreak.thisWeek[index]
                                 ? "bg-gradient-to-r from-neon-orange to-yellow-400 text-white"
                                 : "bg-white/10 text-gray-400"
@@ -399,7 +400,7 @@ export default function StudentProgress() {
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4 mb-4">
                           <img
-                            src={course.image || "/placeholder.svg"}
+                            src={course.image || generateRandomAvatar()}
                             alt={course.title}
                             className="w-16 h-12 rounded-lg object-cover"
                           />
@@ -413,7 +414,7 @@ export default function StudentProgress() {
                             <div className="flex items-center gap-2 mt-1">
                               <Badge
                                 variant="outline"
-                                className={`text-xs ${getDifficultyColor(
+                                className={`text-xs ₦{getDifficultyColor(
                                   course.difficulty
                                 )}`}>
                                 {course.difficulty}
@@ -487,13 +488,13 @@ export default function StudentProgress() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}>
                     <Card
-                      className={`glass-card border-white/10 hover-glow ${
+                      className={`glass-card border-white/10 hover-glow ₦{
                         achievement.unlockedAt ? "opacity-100" : "opacity-60"
                       }`}>
                       <CardContent className="p-6">
                         <div className="flex items-center gap-4 mb-4">
                           <div
-                            className={`w-16 h-16 rounded-full bg-gradient-to-r ${achievement.color} flex items-center justify-center`}>
+                            className={`w-16 h-16 rounded-full bg-gradient-to-r ₦{achievement.color} flex items-center justify-center`}>
                             <achievement.icon className="w-8 h-8 text-white" />
                           </div>
                           <div className="flex-1">
@@ -502,7 +503,7 @@ export default function StudentProgress() {
                             </h4>
                             <Badge
                               variant="outline"
-                              className={`text-xs mt-1 ${getRarityColor(
+                              className={`text-xs mt-1 ₦{getRarityColor(
                                 achievement.rarity
                               )}`}>
                               {achievement.rarity}
@@ -537,7 +538,7 @@ export default function StudentProgress() {
 
                         <p className="text-gray-400 text-xs">
                           {achievement.unlockedAt
-                            ? `Unlocked ${achievement.unlockedAt}`
+                            ? `Unlocked ₦{achievement.unlockedAt}`
                             : "Not unlocked yet"}
                         </p>
                       </CardContent>
@@ -638,7 +639,7 @@ export default function StudentProgress() {
                               {day}
                             </div>
                             <div
-                              className={`h-20 rounded-lg flex items-end justify-center p-2 ${
+                              className={`h-20 rounded-lg flex items-end justify-center p-2 ₦{
                                 learningStreak.thisWeek[index]
                                   ? "bg-gradient-to-t from-neon-blue to-neon-purple"
                                   : "bg-white/10"

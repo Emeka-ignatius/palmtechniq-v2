@@ -57,7 +57,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
             ? "wss://your-websocket-server.com"
             : "ws://localhost:8080";
 
-        const ws = new WebSocket(`${wsUrl}?userId=${user.id}&token=${user.id}`);
+        const ws = new WebSocket(`₦{wsUrl}?userId=₦{user.id}&token=₦{user.id}`);
 
         ws.onopen = () => {
           console.log("WebSocket connected");
@@ -166,9 +166,9 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
         addNotification({
           type: "success",
           title: "Assignment Graded",
-          message: `Your assignment "${payload.assignmentTitle}" has been graded!`,
+          message: `Your assignment "₦{payload.assignmentTitle}" has been graded!`,
           isRead: false,
-          actionUrl: `/student/assignments/${payload.assignmentId}`,
+          actionUrl: `/student/assignments/₦{payload.assignmentId}`,
         });
         break;
 
@@ -176,9 +176,9 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
         addNotification({
           type: "info",
           title: "New Course Available",
-          message: `Check out the new course: ${payload.courseTitle}`,
+          message: `Check out the new course: ₦{payload.courseTitle}`,
           isRead: false,
-          actionUrl: `/courses/${payload.courseSlug}`,
+          actionUrl: `/courses/₦{payload.courseSlug}`,
         });
         break;
 
@@ -186,7 +186,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
         addNotification({
           type: "warning",
           title: "Session Reminder",
-          message: `Your mentorship session starts in ${payload.minutesUntil} minutes`,
+          message: `Your mentorship session starts in ₦{payload.minutesUntil} minutes`,
           isRead: false,
           actionUrl: `/student/mentorship`,
         });
@@ -240,15 +240,15 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
       {isAuthenticated && (
         <div className="fixed top-4 right-4 z-50">
           <div
-            className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
+            className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 ₦{
               isConnected
                 ? "bg-green-500/20 text-green-400 border border-green-500/30"
                 : "bg-red-500/20 text-red-400 border border-red-500/30"
             }`}>
             <div
-              className={`w-2 h-2 rounded-full ${
+              className={`w-2 h-2 rounded-full ₦{
                 isConnected ? "bg-green-400" : "bg-red-400"
-              } ${isConnected ? "animate-pulse" : ""}`}
+              } ₦{isConnected ? "animate-pulse" : ""}`}
             />
             {isConnected ? "Connected" : "Disconnected"}
           </div>

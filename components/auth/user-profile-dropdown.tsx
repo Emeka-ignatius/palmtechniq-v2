@@ -1,32 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  User,
-  Settings,
-  LogOut,
-  Crown,
-  BookOpen,
-  Trophy,
-  Wallet,
-  Star,
-  Users,
-  Calendar,
-  MessageSquare,
-  Shield,
-  ChevronDown,
-  Bell,
-  Moon,
-  Sun,
-  HelpCircle,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { roleMenuItems, roleStats } from "@/lib/const";
 import type { UserRole } from "@/types/user";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  Bell,
+  ChevronDown,
+  Crown,
+  HelpCircle,
+  LogOut,
+  Moon,
+  Sun,
+} from "lucide-react";
+import { signOut } from "next-auth/react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface UserProfileDropdownProps {
   userRole: UserRole;
@@ -34,56 +27,6 @@ interface UserProfileDropdownProps {
   userEmail: string;
   userAvatar?: string;
 }
-
-const roleMenuItems = {
-  USER: [
-    { icon: User, label: "Profile", href: "/profile" },
-    { icon: BookOpen, label: "My Courses", href: "/courses" },
-    { icon: Settings, label: "Settings", href: "/settings" },
-  ],
-  STUDENT: [
-    { icon: User, label: "Profile", href: "/student/profile" },
-    { icon: BookOpen, label: "My Courses", href: "/student/courses" },
-    { icon: Trophy, label: "Progress", href: "/student/progress" },
-    { icon: Calendar, label: "Mentorship", href: "/student/mentorship" },
-    { icon: MessageSquare, label: "Projects", href: "/student/projects" },
-    { icon: Settings, label: "Settings", href: "/student/settings" },
-  ],
-  TUTOR: [
-    { icon: User, label: "Profile", href: "/tutor/profile" },
-    { icon: BookOpen, label: "My Courses", href: "/tutor/courses" },
-    { icon: Users, label: "Students", href: "/tutor/students" },
-    { icon: Wallet, label: "Earnings", href: "/tutor/wallet" },
-    { icon: Star, label: "Reviews", href: "/tutor/reviews" },
-    { icon: Calendar, label: "Schedule", href: "/tutor/schedule" },
-    { icon: Settings, label: "Settings", href: "/tutor/settings" },
-  ],
-  ADMIN: [
-    { icon: Shield, label: "Admin Panel", href: "/admin" },
-    { icon: Users, label: "User Management", href: "/admin/users" },
-    { icon: BookOpen, label: "Course Management", href: "/admin/courses" },
-    { icon: Wallet, label: "Financial Reports", href: "/admin/finance" },
-    { icon: Settings, label: "System Settings", href: "/admin/settings" },
-  ],
-};
-
-const roleStats = {
-  STUDENT: [
-    { label: "Courses Enrolled", value: "12", icon: BookOpen },
-    { label: "Completed", value: "8", icon: Trophy },
-    { label: "Certificates", value: "5", icon: Star },
-  ],
-  TUTOR: [
-    { label: "Total Students", value: "247", icon: Users },
-    { label: "Courses Created", value: "15", icon: BookOpen },
-    { label: "Rating", value: "4.9", icon: Star },
-  ],
-  ADMIN: [
-    { label: "Total Users", value: "12.5K", icon: Users },
-    { label: "Active Courses", value: "450", icon: BookOpen },
-    { label: "Revenue", value: "$125K", icon: Wallet },
-  ],
-};
 
 export function UserProfileDropdown({
   userRole,
@@ -124,6 +67,22 @@ export function UserProfileDropdown({
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      await signOut({ redirect: false });
+      toast.success("Success", {
+        description: "Signed out successfully!",
+      });
+
+      setIsOpen(false);
+      window.location.href = "/courses";
+    } catch (error) {
+      toast.error("Error", {
+        description: "Failed to sign out. Please try again.",
+      });
+    }
+  };
+
   return (
     <div className="relative">
       {/* Profile Trigger */}
@@ -134,11 +93,11 @@ export function UserProfileDropdown({
           onClick={() => setIsOpen(!isOpen)}>
           <Avatar className="w-8 h-8 ring-2 ring-neon-blue/50 hover:ring-neon-blue transition-all duration-300">
             <AvatarImage
-              src={userAvatar || "/placeholder.svg"}
+              src={userAvatar || generateRandomAvatar()}
               alt={userName}
             />
             <AvatarFallback
-              className={`bg-gradient-to-r ${getRoleColor()} text-white text-sm`}>
+              className={`bg-gradient-to-r ₦{getRoleColor()} text-white text-sm`}>
               {userName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -147,7 +106,7 @@ export function UserProfileDropdown({
             <p className="text-xs text-gray-400">{userRole}</p>
           </div>
           <ChevronDown
-            className={`w-4 h-4 transition-transform duration-200 ${
+            className={`w-4 h-4 transition-transform duration-200 ₦{
               isOpen ? "rotate-180" : ""
             }`}
           />
@@ -176,18 +135,18 @@ export function UserProfileDropdown({
                 <div className="flex items-center gap-3">
                   <Avatar className="w-12 h-12 ring-2 ring-neon-blue/50">
                     <AvatarImage
-                      src={userAvatar || "/placeholder.svg"}
+                      src={userAvatar || generateRandomAvatar()}
                       alt={userName}
                     />
                     <AvatarFallback
-                      className={`bg-gradient-to-r ${getRoleColor()} text-white`}>
+                      className={`bg-gradient-to-r ₦{getRoleColor()} text-white`}>
                       {userName.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     <h3 className="font-semibold text-white">{userName}</h3>
                     <p className="text-sm text-gray-400">{userEmail}</p>
-                    <Badge className={`mt-1 text-xs ${getRoleBadgeColor()}`}>
+                    <Badge className={`mt-1 text-xs ₦{getRoleBadgeColor()}`}>
                       {userRole === "ADMIN" && (
                         <Crown className="w-3 h-3 mr-1" />
                       )}
@@ -277,7 +236,8 @@ export function UserProfileDropdown({
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-500/10">
+                  className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                  onClick={handleSignOut}>
                   <LogOut className="w-4 h-4 mr-3" />
                   Sign Out
                 </Button>

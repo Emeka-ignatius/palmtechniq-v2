@@ -1,32 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import {
-  Plus,
-  Search,
-  Filter,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Eye,
-  Users,
-  Star,
-  DollarSign,
-  TrendingUp,
-  BookOpen,
-  Calendar,
-  BarChart3,
-  Settings,
-  Copy,
-  Share2,
-  Archive,
-} from "lucide-react";
-import { Navigation } from "@/components/navigation";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -34,20 +18,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Progress } from "@/components/ui/progress";
+import { generateRandomAvatar } from "@/lib/utils";
 import type { UserRole } from "@/types/user";
+import { motion } from "framer-motion";
+import {
+  Archive,
+  BarChart3,
+  BookOpen,
+  Calendar,
+  Copy,
+  DollarSign,
+  Edit,
+  Eye,
+  Filter,
+  MoreHorizontal,
+  Plus,
+  Search,
+  Settings,
+  Share2,
+  Star,
+  Trash2,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function TutorCoursesPage() {
   const [userRole] = useState<UserRole>("TUTOR");
   const [userName] = useState("Sarah Chen");
-  const [userAvatar] = useState("/placeholder.svg?height=40&width=40");
+  const [userAvatar] = useState(generateRandomAvatar());
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
@@ -57,7 +57,7 @@ export default function TutorCoursesPage() {
     {
       id: 1,
       title: "React Crash Course - Build 5 Projects",
-      thumbnail: "/placeholder.svg?height=200&width=300",
+      thumbnail: generateRandomAvatar(),
       status: "published",
       students: 12450,
       rating: 4.9,
@@ -77,7 +77,7 @@ export default function TutorCoursesPage() {
     {
       id: 2,
       title: "Advanced React Patterns",
-      thumbnail: "/placeholder.svg?height=200&width=300",
+      thumbnail: generateRandomAvatar(),
       status: "published",
       students: 3240,
       rating: 4.8,
@@ -97,7 +97,7 @@ export default function TutorCoursesPage() {
     {
       id: 3,
       title: "JavaScript Fundamentals",
-      thumbnail: "/placeholder.svg?height=200&width=300",
+      thumbnail: generateRandomAvatar(),
       status: "draft",
       students: 0,
       rating: 0,
@@ -117,7 +117,7 @@ export default function TutorCoursesPage() {
     {
       id: 4,
       title: "Node.js Backend Development",
-      thumbnail: "/placeholder.svg?height=200&width=300",
+      thumbnail: generateRandomAvatar(),
       status: "archived",
       students: 1890,
       rating: 4.6,
@@ -167,7 +167,7 @@ export default function TutorCoursesPage() {
       <Card className="glass-card border-white/10 hover-glow overflow-hidden">
         <div className="relative">
           <img
-            src={course.thumbnail || "/placeholder.svg"}
+            src={course.thumbnail || generateRandomAvatar()}
             alt={course.title}
             className="w-full h-48 object-cover"
           />
@@ -265,7 +265,7 @@ export default function TutorCoursesPage() {
               <div className="flex items-center justify-center space-x-1 text-green-400 mb-1">
                 <DollarSign className="w-4 h-4" />
                 <span className="font-bold">
-                  ${course.earnings.toLocaleString()}
+                  ₦{course.earnings.toLocaleString()}
                 </span>
               </div>
               <p className="text-gray-400 text-xs">Total Earnings</p>
@@ -379,7 +379,7 @@ export default function TutorCoursesPage() {
                 <CardContent className="p-6 text-center">
                   <DollarSign className="w-8 h-8 text-neon-orange mx-auto mb-2" />
                   <div className="text-2xl font-bold text-white">
-                    $
+                    ₦
                     {courses
                       .reduce((sum, course) => sum + course.earnings, 0)
                       .toLocaleString()}

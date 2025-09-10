@@ -45,11 +45,12 @@ import {
   Zap,
 } from "lucide-react";
 import type { UserRole } from "@/types/user";
+import { generateRandomAvatar } from "@/lib/utils";
 
 export default function MentorshipPage() {
   const [userRole] = useState<UserRole>("STUDENT");
   const [userName] = useState("Alex Johnson");
-  const [userAvatar] = useState("/placeholder.svg?height=40&width=40");
+  const [userAvatar] = useState(generateRandomAvatar());
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedExperience, setSelectedExperience] = useState("all");
@@ -72,7 +73,7 @@ export default function MentorshipPage() {
       title: "Senior Engineering Manager",
       company: "Meta",
       location: "San Francisco, CA",
-      avatar: "/placeholder.svg?height=120&width=120",
+      avatar: generateRandomAvatar(),
       rating: 4.9,
       reviews: 127,
       sessions: 450,
@@ -101,7 +102,7 @@ export default function MentorshipPage() {
       title: "VP of Product",
       company: "Stripe",
       location: "New York, NY",
-      avatar: "/placeholder.svg?height=120&width=120",
+      avatar: generateRandomAvatar(),
       rating: 4.8,
       reviews: 89,
       sessions: 320,
@@ -134,7 +135,7 @@ export default function MentorshipPage() {
       title: "ML Research Scientist",
       company: "OpenAI",
       location: "Seattle, WA",
-      avatar: "/placeholder.svg?height=120&width=120",
+      avatar: generateRandomAvatar(),
       rating: 5.0,
       reviews: 45,
       sessions: 180,
@@ -158,7 +159,7 @@ export default function MentorshipPage() {
       title: "Creative Director",
       company: "IDEO",
       location: "London, UK",
-      avatar: "/placeholder.svg?height=120&width=120",
+      avatar: generateRandomAvatar(),
       rating: 4.7,
       reviews: 156,
       sessions: 280,
@@ -186,7 +187,7 @@ export default function MentorshipPage() {
     {
       id: 1,
       mentor: "Sarah Chen",
-      mentorAvatar: "/placeholder.svg?height=40&width=40",
+      mentorAvatar: generateRandomAvatar(),
       topic: "System Design Interview Prep",
       date: "2024-01-15",
       time: "3:00 PM",
@@ -197,7 +198,7 @@ export default function MentorshipPage() {
     {
       id: 2,
       mentor: "Marcus Johnson",
-      mentorAvatar: "/placeholder.svg?height=40&width=40",
+      mentorAvatar: generateRandomAvatar(),
       topic: "Product Strategy Deep Dive",
       date: "2024-01-17",
       time: "10:00 AM",
@@ -219,7 +220,7 @@ export default function MentorshipPage() {
           <div className="flex items-start gap-4 mb-4">
             <div className="relative">
               <Avatar className="w-20 h-20">
-                <AvatarImage src={mentor.avatar || "/placeholder.svg"} />
+                <AvatarImage src={mentor.avatar || generateRandomAvatar()} />
                 <AvatarFallback className="bg-gradient-to-r from-neon-blue to-neon-purple text-white text-lg">
                   {mentor.name
                     .split(" ")
@@ -269,7 +270,7 @@ export default function MentorshipPage() {
                 </span>
               </div>
               <p className="text-2xl font-bold text-white">
-                ${mentor.hourlyRate}/hr
+                ₦{mentor.hourlyRate}/hr
               </p>
               <p className="text-xs text-gray-400">{mentor.responseTime}</p>
             </div>
@@ -419,14 +420,14 @@ export default function MentorshipPage() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="45">
-                            45 minutes - $
+                            45 minutes - ₦
                             {(mentor.hourlyRate * 0.75).toFixed(0)}
                           </SelectItem>
                           <SelectItem value="60">
-                            60 minutes - ${mentor.hourlyRate}
+                            60 minutes - ₦{mentor.hourlyRate}
                           </SelectItem>
                           <SelectItem value="90">
-                            90 minutes - ${(mentor.hourlyRate * 1.5).toFixed(0)}
+                            90 minutes - ₦{(mentor.hourlyRate * 1.5).toFixed(0)}
                           </SelectItem>
                         </SelectContent>
                       </Select>
@@ -445,24 +446,24 @@ export default function MentorshipPage() {
                       <div className="flex justify-between">
                         <span className="text-gray-400">Rate:</span>
                         <span className="text-white">
-                          ${mentor.hourlyRate}/hour
+                          ₦{mentor.hourlyRate}/hour
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">Platform Fee:</span>
-                        <span className="text-white">$5</span>
+                        <span className="text-white">₦5</span>
                       </div>
                       <div className="flex justify-between font-medium">
                         <span className="text-white">Total:</span>
                         <span className="text-white">
-                          ${mentor.hourlyRate + 5}
+                          ₦{mentor.hourlyRate + 5}
                         </span>
                       </div>
                     </div>
                   </div>
 
                   <Button className="w-full bg-gradient-to-r from-neon-green to-emerald-400 text-white">
-                    Confirm Booking - ${mentor.hourlyRate + 5}
+                    Confirm Booking - ₦{mentor.hourlyRate + 5}
                   </Button>
                 </div>
               </DialogContent>
@@ -572,9 +573,9 @@ export default function MentorshipPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Prices</SelectItem>
-                  <SelectItem value="0-100">$0 - $100</SelectItem>
-                  <SelectItem value="100-200">$100 - $200</SelectItem>
-                  <SelectItem value="200+">$200+</SelectItem>
+                  <SelectItem value="0-100">₦0 - ₦100</SelectItem>
+                  <SelectItem value="100-200">₦100 - ₦200</SelectItem>
+                  <SelectItem value="200+">₦200+</SelectItem>
                 </SelectContent>
               </Select>
               <Button
@@ -626,7 +627,9 @@ export default function MentorshipPage() {
                         <div className="flex items-center gap-3 mb-4">
                           <Avatar className="w-12 h-12">
                             <AvatarImage
-                              src={session.mentorAvatar || "/placeholder.svg"}
+                              src={
+                                session.mentorAvatar || generateRandomAvatar()
+                              }
                             />
                             <AvatarFallback className="bg-gradient-to-r from-neon-blue to-neon-purple text-white">
                               {session.mentor

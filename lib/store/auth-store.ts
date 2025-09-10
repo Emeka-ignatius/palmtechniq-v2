@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { generateRandomAvatar } from "../utils";
 
 export interface User {
   id: string;
@@ -56,7 +57,7 @@ export const useAuthStore = create<AuthState>()(
             firstName: "John",
             lastName: "Doe",
             role: "STUDENT",
-            avatar: "/placeholder.svg?height=40&width=40",
+            avatar: generateRandomAvatar(),
             isVerified: true,
             createdAt: new Date().toISOString(),
           };

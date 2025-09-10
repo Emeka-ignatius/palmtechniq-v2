@@ -1,13 +1,26 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Navigation } from "@/components/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  addLessonToModule,
+  addModuleToCourse,
+  createCourse,
+  uploadCourseFile,
+} from "@/actions/tutor-actions";
+import FormError from "@/components/shared/form-error";
+import FormSuccess from "@/components/shared/form-success";
+import UploadFile from "@/components/shared/uploader";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -15,151 +28,210 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { courseSchema, lessonSchema, moduleSchema } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "framer-motion";
 import {
   BookOpen,
-  Upload,
-  Plus,
-  X,
-  Save,
-  Eye,
-  Settings,
   DollarSign,
+  Eye,
   PlayCircle,
-  ImageIcon,
-  Video,
+  Plus,
+  Save,
+  Settings,
+  X,
 } from "lucide-react";
-import type { UserRole } from "@/types/user";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
 interface CourseModule {
   id: string;
   title: string;
-  description: string;
+  description?: string;
+  content?: string;
+  duration: number;
   lessons: CourseLesson[];
   order: number;
+  isPublished: boolean;
 }
 
 interface CourseLesson {
   id: string;
   title: string;
-  type: "video" | "text" | "quiz" | "assignment";
+  type: "VIDEO";
   duration: number;
   content?: string;
   videoUrl?: string;
   order: number;
+  description?: string; // Added
+  isPreview: boolean;
 }
 
-export default function CreateCourse() {
-  const [userRole] = useState<UserRole>("TUTOR");
-  const [userName] = useState("Sarah Johnson");
-  const [userAvatar] = useState("/placeholder.svg?height=40&width=40");
-  const [currentStep, setCurrentStep] = useState(0);
+const categories = [
+  "Web Development",
+  "Mobile Development",
+  "Data Science",
+  "Machine Learning",
+  "UI/UX Design",
+  "Digital Marketing",
+  "Business",
+  "Entrepreneurship",
+  "Finance & Accounting",
+  "Leadership & Management",
+  "Personal Development",
+  "Productivity",
+  "Photography",
+  "Graphic Design",
+  "Music",
+  "Film & Video",
+  "Language Learning",
+  "Health & Fitness",
+  "Nutrition & Diet",
+  "Lifestyle",
+  "Cooking",
+  "Art & Creativity",
+  "Cybersecurity",
+  "Cloud Computing",
+  "DevOps",
+];
 
-  const [courseData, setCourseData] = useState({
-    title: "",
-    subtitle: "",
-    description: "",
-    category: "",
-    level: "",
-    language: "English",
-    price: 0,
-    currency: "USD",
-    thumbnail: "",
-    previewVideo: "",
-    tags: [] as string[],
-    requirements: [] as string[],
-    learningOutcomes: [] as string[],
-    isPublished: false,
-    allowDiscussions: true,
-    certificateEnabled: true,
+const levels = ["Beginner", "Intermediate", "Advanced"];
+
+export default function CreateCourse() {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [modules, setModules] = useState<CourseModule[]>([]);
+  const [uploading, setUploading] = useState({
+    thumbnail: false,
+    video: false,
+  });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const form = useForm<z.infer<typeof courseSchema>>({
+    resolver: zodResolver(courseSchema),
+    defaultValues: {
+      title: "",
+      subtitle: "",
+      description: "",
+      duration: 0,
+      category: "",
+      level: "BEGINNER",
+      language: "English",
+      price: 0,
+      basePrice: 0,
+      currentPrice: 0,
+      currency: "NGN",
+      thumbnail: "",
+      previewVideo: "",
+      tags: [],
+      requirements: [],
+      learningOutcomes: [],
+      isPublished: false,
+      allowDiscussions: true,
+      certificateEnabled: true,
+      isFlashSale: false,
+      flashSaleEnd: undefined,
+      groupBuyingEnabled: false,
+      groupBuyingDiscount: 0,
+    },
   });
 
-  const [modules, setModules] = useState<CourseModule[]>([]);
   const [currentTag, setCurrentTag] = useState("");
   const [currentRequirement, setCurrentRequirement] = useState("");
   const [currentOutcome, setCurrentOutcome] = useState("");
 
-  const categories = [
-    "Web Development",
-    "Mobile Development",
-    "Data Science",
-    "Machine Learning",
-    "UI/UX Design",
-    "Digital Marketing",
-    "Business",
-    "Photography",
-    "Music",
-    "Language Learning",
-  ];
-
-  const levels = ["Beginner", "Intermediate", "Advanced", "All Levels"];
-
-  const addTag = () => {
-    if (currentTag.trim() && !courseData.tags.includes(currentTag.trim())) {
-      setCourseData({
-        ...courseData,
-        tags: [...courseData.tags, currentTag.trim()],
-      });
+  const addTag = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (
+      currentTag.trim() &&
+      !form.getValues("tags").includes(currentTag.trim())
+    ) {
+      form.setValue("tags", [...form.getValues("tags"), currentTag.trim()]);
       setCurrentTag("");
     }
   };
 
-  const removeTag = (tagToRemove: string) => {
-    setCourseData({
-      ...courseData,
-      tags: courseData.tags.filter((tag) => tag !== tagToRemove),
-    });
+  const removeTag = (e: React.MouseEvent, tagToRemove: string) => {
+    e.preventDefault();
+    form.setValue(
+      "tags",
+      form.getValues("tags").filter((tag) => tag !== tagToRemove)
+    );
   };
 
-  const addRequirement = () => {
+  const addRequirement = (e: React.MouseEvent) => {
+    e.preventDefault();
     if (currentRequirement.trim()) {
-      setCourseData({
-        ...courseData,
-        requirements: [...courseData.requirements, currentRequirement.trim()],
-      });
+      form.setValue("requirements", [
+        ...form.getValues("requirements"),
+        currentRequirement.trim(),
+      ]);
       setCurrentRequirement("");
     }
   };
 
-  const removeRequirement = (index: number) => {
-    setCourseData({
-      ...courseData,
-      requirements: courseData.requirements.filter((_, i) => i !== index),
-    });
+  const removeRequirement = (e: React.MouseEvent, index: number) => {
+    e.preventDefault();
+    form.setValue(
+      "requirements",
+      form.getValues("requirements").filter((_, i) => i !== index)
+    );
   };
 
-  const addLearningOutcome = () => {
+  const addLearningOutcome = (e: React.MouseEvent) => {
+    e.preventDefault();
     if (currentOutcome.trim()) {
-      setCourseData({
-        ...courseData,
-        learningOutcomes: [
-          ...courseData.learningOutcomes,
-          currentOutcome.trim(),
-        ],
-      });
+      form.setValue("learningOutcomes", [
+        ...form.getValues("learningOutcomes"),
+        currentOutcome.trim(),
+      ]);
       setCurrentOutcome("");
     }
   };
 
-  const removeLearningOutcome = (index: number) => {
-    setCourseData({
-      ...courseData,
-      learningOutcomes: courseData.learningOutcomes.filter(
-        (_, i) => i !== index
-      ),
-    });
+  const removeLearningOutcome = (e: React.MouseEvent, index: number) => {
+    e.preventDefault();
+    form.setValue(
+      "learningOutcomes",
+      form.getValues("learningOutcomes").filter((_, i) => i !== index)
+    );
   };
 
-  const addModule = () => {
+  const addModule = async (courseId?: string) => {
     const newModule: CourseModule = {
-      id: Date.now().toString(),
+      id: `temp-${Date.now()}`,
       title: `Module ${modules.length + 1}`,
       description: "",
+      content: "",
+      duration: 0,
       lessons: [],
       order: modules.length,
+      isPublished: false,
     };
-    setModules([...modules, newModule]);
+    const validatedModule = moduleSchema.safeParse(newModule);
+    if (!validatedModule.success) {
+      toast.error(
+        validatedModule.error.issues[0]?.message || "Validation error"
+      );
+      return;
+    }
+    if (courseId) {
+      const result = await addModuleToCourse(courseId, validatedModule.data);
+      if (result.success) {
+        setModules([...modules, { ...newModule, id: result.moduleId }]);
+      } else {
+        toast.error(result.error);
+      }
+    } else {
+      setModules([...modules, newModule]);
+    }
   };
 
   const updateModule = (moduleId: string, updates: Partial<CourseModule>) => {
@@ -170,25 +242,48 @@ export default function CreateCourse() {
     );
   };
 
-  const removeModule = (moduleId: string) => {
+  const removeModule = (e: React.MouseEvent, moduleId: string) => {
+    e.preventDefault();
     setModules(modules.filter((module) => module.id !== moduleId));
   };
 
-  const addLesson = (moduleId: string) => {
+  const addLesson = async (moduleId: string, courseId?: string) => {
     const module = modules.find((m) => m.id === moduleId);
     if (!module) return;
 
     const newLesson: CourseLesson = {
-      id: Date.now().toString(),
+      id: `temp-${Date.now()}`,
       title: `Lesson ${module.lessons.length + 1}`,
-      type: "video",
+      type: "VIDEO",
       duration: 0,
       order: module.lessons.length,
+      description: "",
+      content: "",
+      isPreview: false,
     };
 
-    updateModule(moduleId, {
-      lessons: [...module.lessons, newLesson],
-    });
+    const validatedLesson = lessonSchema.safeParse(newLesson);
+    if (!validatedLesson.success) {
+      toast.error(validatedLesson.error.issues[0]?.message);
+      return;
+    }
+
+    if (courseId) {
+      const result = await addLessonToModule(
+        courseId,
+        moduleId,
+        validatedLesson.data
+      );
+      if (result.success) {
+        updateModule(moduleId, {
+          lessons: [...module.lessons, { ...newLesson, id: result.lessonId }],
+        });
+      } else {
+        toast.error(result.error);
+      }
+    } else {
+      updateModule(moduleId, { lessons: [...module.lessons, newLesson] });
+    }
   };
 
   const updateLesson = (
@@ -202,11 +297,15 @@ export default function CreateCourse() {
     const updatedLessons = module.lessons.map((lesson) =>
       lesson.id === lessonId ? { ...lesson, ...updates } : lesson
     );
-
     updateModule(moduleId, { lessons: updatedLessons });
   };
 
-  const removeLesson = (moduleId: string, lessonId: string) => {
+  const removeLesson = (
+    e: React.MouseEvent,
+    moduleId: string,
+    lessonId: string
+  ) => {
+    e.preventDefault();
     const module = modules.find((m) => m.id === moduleId);
     if (!module) return;
 
@@ -215,14 +314,54 @@ export default function CreateCourse() {
     });
   };
 
-  const handleSaveDraft = () => {
-    console.log("Saving draft:", { courseData, modules });
-    // Here you would save to your backend
-  };
+  const onSubmit = (
+    values: z.infer<typeof courseSchema>,
+    isPublished: boolean
+  ) => {
+    if (isPublished) {
+      if (modules.length < 1 || modules.some((mod) => mod.lessons.length < 5)) {
+        setError(
+          "Course must have at least one module with 5 lessons to publish"
+        );
+        toast.error(
+          "Course must have at least one module with 5 lessons to publish"
+        );
+        return;
+      }
+      if (!values.thumbnail) {
+        setError("Please upload a course thumbnail");
+        toast.error("Please upload a course thumbnail");
+        return;
+      }
+    }
 
-  const handlePublish = () => {
-    console.log("Publishing course:", { courseData, modules });
-    // Here you would publish the course
+    setError("");
+    setSuccess("");
+
+    startTransition(() => {
+      createCourse({ ...values, isPublished }, modules)
+        .then((data) => {
+          if (data && "error" in data) {
+            setError(data.error!);
+            toast.error(data.error);
+          } else {
+            form.reset();
+            setModules([]);
+            setSuccess("Course created successfully");
+            toast.success("Course created successfully");
+            router.refresh();
+            if (isPublished) {
+              router.push("/tutor/courses");
+            }
+          }
+        })
+
+        .catch((error) => {
+          console.error("Error during creation:", error);
+          setError("Something went wrong! Please try again");
+          toast.error("Something went wrong! Please try again");
+        });
+    });
   };
 
   const steps = [
@@ -234,371 +373,480 @@ export default function CreateCourse() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="pt-32 pb-8 relative overflow-hidden">
+      <section className="pt-32 pb-16 relative overflow-hidden">
         <div className="absolute inset-0 cyber-grid opacity-20" />
-        <motion.div
-          className="absolute top-20 right-20 w-96 h-96 bg-neon-purple/10 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.6, 0.3],
-          }}
-          transition={{
-            duration: 4,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-          }}
-        />
-
         <div className="container mx-auto px-6 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-12">
-            <h1 className="text-5xl md:text-6xl font-bold mb-4">
-              <span className="text-white">Create</span>{" "}
-              <span className="text-gradient">Course</span>
+            className="text-center mb-16">
+            <h1 className="text-5xl font-bold mb-4 text-gradient">
+              Create New Course
             </h1>
-            <p className="text-xl text-gray-300">
-              Share your knowledge with the world
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+              Build an engaging, high-converting course for PalmTechnIQ
+              learners.
             </p>
+            {error && <FormError message={error} />}
+            {success && <FormSuccess message={success} />}
           </motion.div>
 
-          {/* Progress Steps */}
-          <div className="max-w-4xl mx-auto mb-8">
-            <div className="flex items-center justify-between">
-              {steps.map((step, index) => (
-                <div key={step.id} className="flex items-center">
-                  <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
-                      currentStep >= step.id
-                        ? "bg-gradient-to-r from-neon-blue to-neon-purple text-white"
-                        : "bg-white/10 text-gray-400"
-                    }`}>
-                    <step.icon className="w-5 h-5" />
-                  </div>
-                  <span
-                    className={`ml-3 font-medium ${
-                      currentStep >= step.id ? "text-white" : "text-gray-400"
-                    }`}>
-                    {step.title}
-                  </span>
-                  {index < steps.length - 1 && (
-                    <div
-                      className={`w-16 h-0.5 mx-4 transition-all duration-300 ${
-                        currentStep > step.id
-                          ? "bg-gradient-to-r from-neon-blue to-neon-purple"
-                          : "bg-white/20"
-                      }`}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Course Creation Form */}
-          <div className="max-w-6xl mx-auto">
-            <Card className="glass-card border-white/10">
-              <CardContent className="p-8">
-                {/* Step 0: Basic Info */}
-                {currentStep === 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="space-y-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                      <div className="space-y-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="title" className="text-white">
-                            Course Title *
-                          </Label>
-                          <Input
-                            id="title"
-                            placeholder="e.g., Complete React Development Course"
-                            value={courseData.title}
-                            onChange={(e) =>
-                              setCourseData({
-                                ...courseData,
-                                title: e.target.value,
-                              })
-                            }
-                            className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="subtitle" className="text-white">
-                            Course Subtitle
-                          </Label>
-                          <Input
-                            id="subtitle"
-                            placeholder="A brief, engaging description"
-                            value={courseData.subtitle}
-                            onChange={(e) =>
-                              setCourseData({
-                                ...courseData,
-                                subtitle: e.target.value,
-                              })
-                            }
-                            className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="description" className="text-white">
-                            Course Description *
-                          </Label>
-                          <Textarea
-                            id="description"
-                            placeholder="Detailed description of what students will learn..."
-                            value={courseData.description}
-                            onChange={(e) =>
-                              setCourseData({
-                                ...courseData,
-                                description: e.target.value,
-                              })
-                            }
-                            rows={6}
-                            className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label className="text-white">Category *</Label>
-                            <Select
-                              value={courseData.category}
-                              onValueChange={(value) =>
-                                setCourseData({
-                                  ...courseData,
-                                  category: value,
-                                })
-                              }>
-                              <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                                <SelectValue placeholder="Select category" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {categories.map((category) => (
-                                  <SelectItem key={category} value={category}>
-                                    {category}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label className="text-white">Level *</Label>
-                            <Select
-                              value={courseData.level}
-                              onValueChange={(value) =>
-                                setCourseData({ ...courseData, level: value })
-                              }>
-                              <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                                <SelectValue placeholder="Select level" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {levels.map((level) => (
-                                  <SelectItem key={level} value={level}>
-                                    {level}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-6">
-                        {/* Course Thumbnail */}
-                        <div className="space-y-2">
-                          <Label className="text-white">Course Thumbnail</Label>
-                          <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center hover:border-neon-blue/50 transition-colors cursor-pointer">
-                            <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                            <p className="text-gray-300 mb-2">
-                              Upload course thumbnail
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              Recommended: 1280x720px, JPG/PNG
-                            </p>
-                            <Button className="mt-4 bg-gradient-to-r from-neon-blue to-neon-purple">
-                              <Upload className="w-4 h-4 mr-2" />
-                              Choose File
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* Preview Video */}
-                        <div className="space-y-2">
-                          <Label className="text-white">
-                            Preview Video (Optional)
-                          </Label>
-                          <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center hover:border-neon-purple/50 transition-colors cursor-pointer">
-                            <Video className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                            <p className="text-gray-300 mb-2">
-                              Upload preview video
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              Max 2 minutes, MP4 format
-                            </p>
-                            <Button className="mt-4 bg-gradient-to-r from-neon-purple to-pink-400">
-                              <Upload className="w-4 h-4 mr-2" />
-                              Choose Video
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Tags */}
-                    <div className="space-y-4">
-                      <Label className="text-white">Tags</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="Add a tag..."
-                          value={currentTag}
-                          onChange={(e) => setCurrentTag(e.target.value)}
-                          onKeyPress={(e) => e.key === "Enter" && addTag()}
-                          className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                        />
-                        <Button
-                          onClick={addTag}
-                          className="bg-gradient-to-r from-neon-green to-emerald-400">
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {courseData.tags.map((tag, index) => (
-                          <Badge
-                            key={index}
-                            variant="outline"
-                            className="border-neon-blue text-neon-blue">
-                            {tag}
-                            <X
-                              className="w-3 h-3 ml-1 cursor-pointer hover:text-red-400"
-                              onClick={() => removeTag(tag)}
-                            />
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Requirements */}
-                    <div className="space-y-4">
-                      <Label className="text-white">Requirements</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="Add a requirement..."
-                          value={currentRequirement}
-                          onChange={(e) =>
-                            setCurrentRequirement(e.target.value)
-                          }
-                          onKeyPress={(e) =>
-                            e.key === "Enter" && addRequirement()
-                          }
-                          className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                        />
-                        <Button
-                          onClick={addRequirement}
-                          className="bg-gradient-to-r from-neon-orange to-yellow-400">
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                      </div>
-                      <div className="space-y-2">
-                        {courseData.requirements.map((requirement, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center gap-2 p-2 bg-white/5 rounded">
-                            <span className="text-gray-300 flex-1">
-                              {requirement}
-                            </span>
-                            <X
-                              className="w-4 h-4 text-gray-400 cursor-pointer hover:text-red-400"
-                              onClick={() => removeRequirement(index)}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Learning Outcomes */}
-                    <div className="space-y-4">
-                      <Label className="text-white">
-                        What will students learn?
-                      </Label>
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="Add a learning outcome..."
-                          value={currentOutcome}
-                          onChange={(e) => setCurrentOutcome(e.target.value)}
-                          onKeyPress={(e) =>
-                            e.key === "Enter" && addLearningOutcome()
-                          }
-                          className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                        />
-                        <Button
-                          onClick={addLearningOutcome}
-                          className="bg-gradient-to-r from-neon-purple to-pink-400">
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                      </div>
-                      <div className="space-y-2">
-                        {courseData.learningOutcomes.map((outcome, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center gap-2 p-2 bg-white/5 rounded">
-                            <span className="text-gray-300 flex-1">
-                              {outcome}
-                            </span>
-                            <X
-                              className="w-4 h-4 text-gray-400 cursor-pointer hover:text-red-400"
-                              onClick={() => removeLearningOutcome(index)}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Step 1: Curriculum */}
-                {currentStep === 1 && (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-2xl font-bold text-white">
-                        Course Curriculum
-                      </h3>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit((data) => onSubmit(data, false))}
+              className="space-y-8">
+              <Card className="glass-card border-white/10 hover-glow">
+                <CardContent className="p-8">
+                  <div className="flex flex-wrap gap-4 mb-8">
+                    {steps.map((step) => (
                       <Button
-                        onClick={addModule}
-                        className="bg-gradient-to-r from-neon-blue to-neon-purple">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Module
+                        key={step.id}
+                        variant={
+                          currentStep === step.id ? "default" : "outline"
+                        }
+                        className={`flex-1 text-center ${
+                          currentStep === step.id
+                            ? "bg-gradient-to-r from-neon-blue to-neon-purple"
+                            : "border-white/20 text-white hover:bg-white/10"
+                        }`}
+                        onClick={() => setCurrentStep(step.id)}>
+                        <step.icon className="w-4 h-4 mr-2" />
+                        {step.title}
                       </Button>
-                    </div>
+                    ))}
+                  </div>
 
-                    <div className="space-y-6">
-                      {modules.map((module, moduleIndex) => (
-                        <Card
-                          key={module.id}
-                          className="glass-card border-white/10">
-                          <CardHeader>
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1 space-y-2">
-                                <Input
-                                  value={module.title}
-                                  onChange={(e) =>
-                                    updateModule(module.id, {
-                                      title: e.target.value,
-                                    })
-                                  }
-                                  className="bg-white/10 border-white/20 text-white font-semibold"
-                                  placeholder="Module title"
+                  {currentStep === 0 && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5 }}>
+                      <Card className="glass-card border-white/10">
+                        <CardHeader>
+                          <CardTitle className="text-white">
+                            Basic Information
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                          <FormField
+                            control={form.control}
+                            name="title"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white">
+                                  Course Title
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    className="bg-white/10 border-white/20 text-white"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="subtitle"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white">
+                                  Subtitle
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    className="bg-white/10 border-white/20 text-white"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="description"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white">
+                                  Description
+                                </FormLabel>
+                                <FormControl>
+                                  <Textarea
+                                    {...field}
+                                    className="bg-white/10 border-white/20 text-white"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="category"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white">
+                                  Category
+                                </FormLabel>
+                                <Select
+                                  onValueChange={field.onChange}
+                                  value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {categories.map((cat) => (
+                                      <SelectItem key={cat} value={cat}>
+                                        {cat}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="duration"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white">
+                                  Duration
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    type="number"
+                                    min={0}
+                                    placeholder="Total course Duration in minutes"
+                                    className="bg-white/10 border-white/20 text-white"
+                                    onChange={(e) =>
+                                      field.onChange(e.target.valueAsNumber)
+                                    }
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="level"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white">
+                                  Level
+                                </FormLabel>
+                                <Select
+                                  onValueChange={field.onChange}
+                                  value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {levels.map((level) => (
+                                      <SelectItem
+                                        key={level}
+                                        value={level
+                                          .toUpperCase()
+                                          .replace(" ", "_")}>
+                                        {level}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="language"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white">
+                                  Language
+                                </FormLabel>
+                                <Select
+                                  onValueChange={field.onChange}
+                                  value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="English">
+                                      English
+                                    </SelectItem>
+                                    <SelectItem value="Spanish">
+                                      Spanish
+                                    </SelectItem>
+                                    <SelectItem value="French">
+                                      French
+                                    </SelectItem>
+                                    <SelectItem value="German">
+                                      German
+                                    </SelectItem>
+                                    <SelectItem value="Portuguese">
+                                      Portuguese
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="thumbnail"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white">
+                                  Course Thumbnail
+                                </FormLabel>
+                                <FormControl>
+                                  <UploadFile
+                                    setValue={form.setValue}
+                                    fieldName="thumbnail"
+                                    uploading={uploading.thumbnail}
+                                    setUploading={(value) =>
+                                      setUploading((prev) => ({
+                                        ...prev,
+                                        thumbnail:
+                                          typeof value === "function"
+                                            ? value(prev.thumbnail)
+                                            : value,
+                                      }))
+                                    }
+                                  />
+                                </FormControl>
+                                {field.value && (
+                                  <img
+                                    src={field.value}
+                                    alt="Thumbnail"
+                                    className="mt-2 h-24 rounded"
+                                  />
+                                )}
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="previewVideo"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white">
+                                  Preview Video
+                                </FormLabel>
+                                <FormControl>
+                                  <UploadFile
+                                    setValue={form.setValue}
+                                    fieldName="previewVideo"
+                                    uploading={uploading.video}
+                                    setUploading={(value) =>
+                                      setUploading((prev) => ({
+                                        ...prev,
+                                        thumbnail:
+                                          typeof value === "function"
+                                            ? value(prev.thumbnail)
+                                            : value,
+                                      }))
+                                    }
+                                  />
+                                </FormControl>
+                                {field.value && (
+                                  <video
+                                    src={field.value}
+                                    controls
+                                    className="mt-2 h-24 rounded"
+                                  />
+                                )}
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </CardContent>
+                      </Card>
+
+                      <Card className="glass-card border-white/10 mt-6">
+                        <CardHeader>
+                          <CardTitle className="text-white">Tags</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex gap-2">
+                            <Input
+                              value={currentTag}
+                              onChange={(e) => setCurrentTag(e.target.value)}
+                              placeholder="Add a tag"
+                              className="bg-white/10 border-white/20 text-white"
+                            />
+                            <Button
+                              type="button"
+                              onClick={addTag}
+                              className="bg-gradient-to-r from-neon-blue to-neon-purple">
+                              <Plus className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {form.getValues("tags").map((tag) => (
+                              <Badge
+                                key={tag}
+                                className="bg-white/10 text-white">
+                                {tag}
+                                <X
+                                  className="w-3 h-3 ml-2 cursor-pointer"
+                                  onClick={(e) => removeTag(e, tag)}
                                 />
+                              </Badge>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="glass-card border-white/10 mt-6">
+                        <CardHeader>
+                          <CardTitle className="text-white">
+                            Requirements
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex gap-2">
+                            <Input
+                              value={currentRequirement}
+                              onChange={(e) =>
+                                setCurrentRequirement(e.target.value)
+                              }
+                              placeholder="Add a requirement"
+                              className="bg-white/10 border-white/20 text-white"
+                            />
+                            <Button
+                              type="button"
+                              onClick={addRequirement}
+                              className="bg-gradient-to-r from-neon-blue to-neon-purple">
+                              <Plus className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          <ul className="list-disc pl-5 text-gray-300">
+                            {form
+                              .getValues("requirements")
+                              .map((req, index) => (
+                                <li
+                                  key={index}
+                                  className="flex justify-between items-center">
+                                  {req}
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => removeRequirement(e, index)}
+                                    className="text-red-400">
+                                    <X className="w-4 h-4" />
+                                  </Button>
+                                </li>
+                              ))}
+                          </ul>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="glass-card border-white/10 mt-6">
+                        <CardHeader>
+                          <CardTitle className="text-white">
+                            Learning Outcomes
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex gap-2">
+                            <Input
+                              value={currentOutcome}
+                              onChange={(e) =>
+                                setCurrentOutcome(e.target.value)
+                              }
+                              placeholder="Add a learning outcome"
+                              className="bg-white/10 border-white/20 text-white"
+                            />
+                            <Button
+                              type="button"
+                              onClick={addLearningOutcome}
+                              className="bg-gradient-to-r from-neon-blue to-neon-purple">
+                              <Plus className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          <ul className="list-disc pl-5 text-gray-300">
+                            {form
+                              .getValues("learningOutcomes")
+                              .map((outcome, index) => (
+                                <li
+                                  key={index}
+                                  className="flex justify-between items-center">
+                                  {outcome}
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) =>
+                                      removeLearningOutcome(e, index)
+                                    }
+                                    className="text-red-400">
+                                    <X className="w-4 h-4" />
+                                  </Button>
+                                </li>
+                              ))}
+                          </ul>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  )}
+
+                  {currentStep === 1 && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5 }}>
+                      <Card className="glass-card border-white/10">
+                        <CardHeader>
+                          <CardTitle className="text-white">
+                            Curriculum
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                          <Button
+                            type="button"
+                            onClick={() => addModule()}
+                            className="w-full bg-gradient-to-r from-neon-blue to-neon-purple">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Module
+                          </Button>
+                          {modules.map((module) => (
+                            <Card
+                              key={module.id}
+                              className="glass-card border-white/20 mt-4">
+                              <CardHeader>
+                                <div className="flex justify-between items-center">
+                                  <Input
+                                    value={module.title}
+                                    onChange={(e) =>
+                                      updateModule(module.id, {
+                                        title: e.target.value,
+                                      })
+                                    }
+                                    className="bg-transparent border-0 text-white text-lg font-semibold"
+                                  />
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => removeModule(e, module.id)}
+                                    className="text-red-400">
+                                    <X className="w-4 h-4" />
+                                  </Button>
+                                </div>
                                 <Textarea
                                   value={module.description}
                                   onChange={(e) =>
@@ -606,370 +854,390 @@ export default function CreateCourse() {
                                       description: e.target.value,
                                     })
                                   }
-                                  className="bg-white/10 border-white/20 text-white"
                                   placeholder="Module description"
-                                  rows={2}
+                                  className="mt-2 bg-white/10 border-white/20 text-white"
                                 />
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => removeModule(module.id)}
-                                className="text-red-400 hover:text-red-300 hover:bg-red-400/10">
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="space-y-4">
-                              <div className="flex items-center justify-between">
-                                <h4 className="text-lg font-semibold text-white">
-                                  Lessons
-                                </h4>
+                                <Textarea
+                                  value={module.content}
+                                  onChange={(e) =>
+                                    updateModule(module.id, {
+                                      content: e.target.value,
+                                    })
+                                  }
+                                  placeholder="Module content"
+                                  className="mt-2 bg-white/10 border-white/20 text-white"
+                                />
+                                <Input
+                                  type="number"
+                                  value={module.duration}
+                                  onChange={(e) =>
+                                    updateModule(module.id, {
+                                      duration: Number(e.target.value),
+                                    })
+                                  }
+                                  placeholder="Module duration (minutes)"
+                                  className="mt-2 bg-white/10 border-white/20 text-white"
+                                />
+                              </CardHeader>
+                              <CardContent>
                                 <Button
-                                  size="sm"
+                                  type="button"
                                   onClick={() => addLesson(module.id)}
-                                  className="bg-gradient-to-r from-neon-green to-emerald-400">
-                                  <Plus className="w-3 h-3 mr-1" />
+                                  className="w-full bg-gradient-to-r from-neon-green to-emerald-400">
+                                  <Plus className="w-4 h-4 mr-2" />
                                   Add Lesson
                                 </Button>
-                              </div>
-
-                              {module.lessons.map((lesson, lessonIndex) => (
-                                <div
-                                  key={lesson.id}
-                                  className="p-4 bg-white/5 rounded-lg">
-                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <Input
-                                      value={lesson.title}
-                                      onChange={(e) =>
-                                        updateLesson(module.id, lesson.id, {
-                                          title: e.target.value,
-                                        })
-                                      }
-                                      className="bg-white/10 border-white/20 text-white"
-                                      placeholder="Lesson title"
-                                    />
-                                    <Select
-                                      value={lesson.type}
-                                      onValueChange={(value: any) =>
-                                        updateLesson(module.id, lesson.id, {
-                                          type: value,
-                                        })
-                                      }>
-                                      <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                                        <SelectValue />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="video">
-                                          Video
-                                        </SelectItem>
-                                        <SelectItem value="text">
-                                          Text/Article
-                                        </SelectItem>
-                                        <SelectItem value="quiz">
-                                          Quiz
-                                        </SelectItem>
-                                        <SelectItem value="assignment">
-                                          Assignment
-                                        </SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                    <div className="flex gap-2">
+                                {module.lessons.map((lesson) => (
+                                  <div
+                                    key={lesson.id}
+                                    className="mt-4 p-4 bg-white/5 rounded-lg">
+                                    <div className="flex justify-between items-center">
                                       <Input
-                                        type="number"
-                                        value={lesson.duration}
+                                        value={lesson.title}
                                         onChange={(e) =>
                                           updateLesson(module.id, lesson.id, {
-                                            duration:
-                                              Number.parseInt(e.target.value) ||
-                                              0,
+                                            title: e.target.value,
                                           })
                                         }
-                                        className="bg-white/10 border-white/20 text-white"
-                                        placeholder="Duration (min)"
+                                        className="bg-transparent border-0 text-white"
                                       />
                                       <Button
                                         variant="ghost"
-                                        size="icon"
-                                        onClick={() =>
-                                          removeLesson(module.id, lesson.id)
+                                        size="sm"
+                                        onClick={(e) =>
+                                          removeLesson(e, module.id, lesson.id)
                                         }
-                                        className="text-red-400 hover:text-red-300">
+                                        className="text-red-400">
                                         <X className="w-4 h-4" />
                                       </Button>
                                     </div>
+                                    <div className="flex justify-between items-center">
+                                      <Input
+                                        value={lesson.content}
+                                        onChange={(e) =>
+                                          updateLesson(module.id, lesson.id, {
+                                            content: e.target.value,
+                                          })
+                                        }
+                                        className="bg-transparent border-0 text-white"
+                                      />
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={(e) =>
+                                          removeLesson(e, module.id, lesson.id)
+                                        }
+                                        className="text-red-400">
+                                        <X className="w-4 h-4" />
+                                      </Button>
+                                    </div>
+                                    <Select
+                                      value={lesson.type}
+                                      onValueChange={(value) =>
+                                        updateLesson(module.id, lesson.id, {
+                                          type: value as any,
+                                        })
+                                      }>
+                                      <SelectTrigger className="mt-2 bg-white/10 border-white/20 text-white">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="VIDEO">
+                                          Video
+                                        </SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <Input
+                                      type="number"
+                                      placeholder="Duration (minutes)"
+                                      value={lesson.duration}
+                                      onChange={(e) =>
+                                        updateLesson(module.id, lesson.id, {
+                                          duration: Number(e.target.value),
+                                        })
+                                      }
+                                      className="mt-2 bg-white/10 border-white/20 text-white"
+                                    />
+                                    {lesson.type === "VIDEO" && (
+                                      <>
+                                        <Textarea
+                                          value={lesson.description || ""}
+                                          onChange={(e) =>
+                                            updateLesson(module.id, lesson.id, {
+                                              description: e.target.value,
+                                            })
+                                          }
+                                          placeholder="Lesson description"
+                                          className="mt-2 bg-white/10 border-white/20 text-white"
+                                        />
+                                        {/* <Textarea
+                                          value={lesson.content || ""}
+                                          onChange={(e) =>
+                                            updateLesson(module.id, lesson.id, {
+                                              content: e.target.value,
+                                            })
+                                          }
+                                          placeholder="Lesson content"
+                                          className="my-2 bg-white/10 border-white/20 text-white"
+                                        /> */}
+                                        <UploadFile
+                                          setValue={form.setValue}
+                                          fieldName="previewVideo"
+                                          uploading={uploading.video}
+                                          setUploading={(value) =>
+                                            setUploading((prev) => ({
+                                              ...prev,
+                                              thumbnail:
+                                                typeof value === "function"
+                                                  ? value(prev.thumbnail)
+                                                  : value,
+                                            }))
+                                          }
+                                        />
+                                      </>
+                                    )}
+                                    {/* {lesson.type === "TEXT" && (
+                                      <Textarea
+                                        value={lesson.content || ""}
+                                        onChange={(e) =>
+                                          updateLesson(module.id, lesson.id, {
+                                            content: e.target.value,
+                                          })
+                                        }
+                                        placeholder="Lesson content"
+                                        className="mt-2 bg-white/10 border-white/20 text-white"
+                                      />
+                                    )} */}
                                   </div>
-                                </div>
-                              ))}
+                                ))}
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  )}
 
-                              {module.lessons.length === 0 && (
-                                <div className="text-center py-8 text-gray-400">
-                                  <PlayCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                                  <p>
-                                    No lessons yet. Add your first lesson to get
-                                    started.
+                  {currentStep === 2 && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5 }}>
+                      <Card className="glass-card border-white/10">
+                        <CardHeader>
+                          <CardTitle className="text-white">
+                            Pricing & Monetization
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                          <FormField
+                            control={form.control}
+                            name="basePrice"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white">
+                                  Base Price
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    {...field}
+                                    onChange={(e) =>
+                                      field.onChange(Number(e.target.value))
+                                    }
+                                    className="bg-white/10 border-white/20 text-white"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="currentPrice"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white">
+                                  Current Price
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    {...field}
+                                    onChange={(e) =>
+                                      field.onChange(Number(e.target.value))
+                                    }
+                                    className="bg-white/10 border-white/20 text-white"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="groupBuyingEnabled"
+                            render={({ field }) => (
+                              <FormItem className="flex items-center justify-between">
+                                <div>
+                                  <FormLabel className="text-white">
+                                    Enable Group Buying
+                                  </FormLabel>
+                                  <p className="text-sm text-gray-400">
+                                    Offer discounts for group purchases
                                   </p>
                                 </div>
+                                <FormControl>
+                                  <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          {form.getValues("groupBuyingEnabled") && (
+                            <FormField
+                              control={form.control}
+                              name="groupBuyingDiscount"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-white">
+                                    Group Buying Discount (%)
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      max="100"
+                                      value={(field.value ?? 0) * 100}
+                                      onChange={(e) =>
+                                        field.onChange(
+                                          Number(e.target.value) / 100
+                                        )
+                                      }
+                                      className="bg-white/10 border-white/20 text-white"
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
                               )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
+                            />
+                          )}
+                          <FormField
+                            control={form.control}
+                            name="isFlashSale"
+                            render={({ field }) => (
+                              <FormItem className="flex items-center justify-between">
+                                <div>
+                                  <FormLabel className="text-white">
+                                    Enable Flash Sale
+                                  </FormLabel>
+                                  <p className="text-sm text-gray-400">
+                                    Temporary discount period
+                                  </p>
+                                </div>
+                                <FormControl>
+                                  <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          {form.getValues("isFlashSale") && (
+                            <FormField
+                              control={form.control}
+                              name="flashSaleEnd"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-white">
+                                    Flash Sale End Date
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="datetime-local"
+                                      value={
+                                        field.value
+                                          ? field.value.slice(0, 16)
+                                          : ""
+                                      }
+                                      onChange={(e) =>
+                                        field.onChange(e.target.value)
+                                      }
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          )}
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  )}
 
-                      {modules.length === 0 && (
-                        <div className="text-center py-12 text-gray-400">
-                          <BookOpen className="w-16 h-16 mx-auto mb-6 opacity-50" />
-                          <h3 className="text-xl font-semibold mb-2">
-                            No modules yet
-                          </h3>
-                          <p className="mb-6">
-                            Start building your course by adding your first
-                            module.
-                          </p>
-                          <Button
-                            onClick={addModule}
-                            className="bg-gradient-to-r from-neon-blue to-neon-purple">
-                            <Plus className="w-4 h-4 mr-2" />
-                            Add Your First Module
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Step 2: Pricing */}
-                {currentStep === 2 && (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="space-y-8">
-                    <h3 className="text-2xl font-bold text-white">
-                      Course Pricing
-                    </h3>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {currentStep === 3 && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5 }}>
                       <Card className="glass-card border-white/10">
                         <CardHeader>
                           <CardTitle className="text-white">
-                            Pricing Options
+                            Course Settings
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                          <div className="space-y-2">
-                            <Label className="text-white">Course Price</Label>
-                            <div className="flex gap-2">
-                              <Select
-                                value={courseData.currency}
-                                onValueChange={(value) =>
-                                  setCourseData({
-                                    ...courseData,
-                                    currency: value,
-                                  })
-                                }>
-                                <SelectTrigger className="w-24 bg-white/10 border-white/20 text-white">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="USD">USD</SelectItem>
-                                  <SelectItem value="EUR">EUR</SelectItem>
-                                  <SelectItem value="GBP">GBP</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <Input
-                                type="number"
-                                value={courseData.price}
-                                onChange={(e) =>
-                                  setCourseData({
-                                    ...courseData,
-                                    price:
-                                      Number.parseFloat(e.target.value) || 0,
-                                  })
-                                }
-                                className="bg-white/10 border-white/20 text-white"
-                                placeholder="0.00"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="p-4 bg-neon-blue/10 border border-neon-blue/20 rounded-lg">
-                            <h4 className="text-neon-blue font-semibold mb-2">
-                              Pricing Tips
-                            </h4>
-                            <ul className="text-sm text-gray-300 space-y-1">
-                              <li>
-                                • Research similar courses in your category
-                              </li>
-                              <li>• Consider your course length and depth</li>
-                              <li>• You can always adjust pricing later</li>
-                              <li>
-                                • Free courses can help build your reputation
-                              </li>
-                            </ul>
-                          </div>
+                          <FormField
+                            control={form.control}
+                            name="allowDiscussions"
+                            render={({ field }) => (
+                              <FormItem className="flex items-center justify-between">
+                                <div>
+                                  <FormLabel className="text-white">
+                                    Allow Discussions
+                                  </FormLabel>
+                                  <p className="text-sm text-gray-400">
+                                    Enable student discussions
+                                  </p>
+                                </div>
+                                <FormControl>
+                                  <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="certificateEnabled"
+                            render={({ field }) => (
+                              <FormItem className="flex items-center justify-between">
+                                <div>
+                                  <FormLabel className="text-white">
+                                    Provide Certificate
+                                  </FormLabel>
+                                  <p className="text-sm text-gray-400">
+                                    Issue certificate upon completion
+                                  </p>
+                                </div>
+                                <FormControl>
+                                  <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
                         </CardContent>
                       </Card>
 
-                      <Card className="glass-card border-white/10">
-                        <CardHeader>
-                          <CardTitle className="text-white">
-                            Revenue Projection
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <div className="flex justify-between items-center p-3 bg-white/5 rounded">
-                              <span className="text-gray-300">
-                                Course Price
-                              </span>
-                              <span className="text-white font-semibold">
-                                ${courseData.price}
-                              </span>
-                            </div>
-                            <div className="flex justify-between items-center p-3 bg-white/5 rounded">
-                              <span className="text-gray-300">
-                                Platform Fee (10%)
-                              </span>
-                              <span className="text-red-400">
-                                -${(courseData.price * 0.1).toFixed(2)}
-                              </span>
-                            </div>
-                            <div className="flex justify-between items-center p-3 bg-gradient-to-r from-neon-green/20 to-emerald-400/20 rounded border border-neon-green/30">
-                              <span className="text-neon-green font-semibold">
-                                Your Earnings
-                              </span>
-                              <span className="text-neon-green font-bold">
-                                ${(courseData.price * 0.9).toFixed(2)}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="mt-6 p-4 bg-neon-purple/10 border border-neon-purple/20 rounded-lg">
-                            <h4 className="text-neon-purple font-semibold mb-2">
-                              Estimated Monthly Revenue
-                            </h4>
-                            <div className="grid grid-cols-2 gap-4 text-sm">
-                              <div>
-                                <p className="text-gray-400">10 students</p>
-                                <p className="text-white font-semibold">
-                                  ${(courseData.price * 0.9 * 10).toFixed(2)}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-gray-400">50 students</p>
-                                <p className="text-white font-semibold">
-                                  ${(courseData.price * 0.9 * 50).toFixed(2)}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-gray-400">100 students</p>
-                                <p className="text-white font-semibold">
-                                  ${(courseData.price * 0.9 * 100).toFixed(2)}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-gray-400">500 students</p>
-                                <p className="text-white font-semibold">
-                                  ${(courseData.price * 0.9 * 500).toFixed(2)}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Step 3: Settings */}
-                {currentStep === 3 && (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="space-y-8">
-                    <h3 className="text-2xl font-bold text-white">
-                      Course Settings
-                    </h3>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <Card className="glass-card border-white/10">
-                        <CardHeader>
-                          <CardTitle className="text-white">
-                            Course Features
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <Label className="text-white">
-                                Allow Discussions
-                              </Label>
-                              <p className="text-sm text-gray-400">
-                                Enable Q&A and discussions
-                              </p>
-                            </div>
-                            <Switch
-                              checked={courseData.allowDiscussions}
-                              onCheckedChange={(checked) =>
-                                setCourseData({
-                                  ...courseData,
-                                  allowDiscussions: checked,
-                                })
-                              }
-                            />
-                          </div>
-
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <Label className="text-white">
-                                Certificate of Completion
-                              </Label>
-                              <p className="text-sm text-gray-400">
-                                Award certificates to students
-                              </p>
-                            </div>
-                            <Switch
-                              checked={courseData.certificateEnabled}
-                              onCheckedChange={(checked) =>
-                                setCourseData({
-                                  ...courseData,
-                                  certificateEnabled: checked,
-                                })
-                              }
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label className="text-white">
-                              Course Language
-                            </Label>
-                            <Select
-                              value={courseData.language}
-                              onValueChange={(value) =>
-                                setCourseData({
-                                  ...courseData,
-                                  language: value,
-                                })
-                              }>
-                              <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="English">English</SelectItem>
-                                <SelectItem value="Spanish">Spanish</SelectItem>
-                                <SelectItem value="French">French</SelectItem>
-                                <SelectItem value="German">German</SelectItem>
-                                <SelectItem value="Portuguese">
-                                  Portuguese
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      <Card className="glass-card border-white/10">
+                      <Card className="glass-card border-white/10 mt-6">
                         <CardHeader>
                           <CardTitle className="text-white">
                             Publishing Options
@@ -987,22 +1255,44 @@ export default function CreateCourse() {
                               <li>• Review all content</li>
                             </ul>
                           </div>
-
                           <div className="space-y-4">
                             <Button
-                              onClick={handleSaveDraft}
+                              type="submit"
+                              onClick={() =>
+                                form.handleSubmit((data) =>
+                                  onSubmit(data, false)
+                                )()
+                              }
                               className="w-full bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600">
                               <Save className="w-4 h-4 mr-2" />
                               Save as Draft
                             </Button>
-
                             <Button
-                              onClick={handlePublish}
+                              type="button"
+                              onClick={() =>
+                                form.handleSubmit(
+                                  (data) => {
+                                    console.log("✅ Validated data:", data);
+                                    onSubmit(data, true);
+                                  },
+                                  (errors) => {
+                                    console.error(
+                                      "❌ Validation errors:",
+                                      errors
+                                    );
+                                    toast.error(
+                                      "Validation failed, check console for details"
+                                    );
+                                  }
+                                )()
+                              }
                               className="w-full bg-gradient-to-r from-neon-green to-emerald-400"
                               disabled={
-                                !courseData.title ||
-                                !courseData.description ||
-                                modules.length === 0
+                                !form.getValues("title") ||
+                                !form.getValues("description") ||
+                                modules.length === 0 ||
+                                modules.some((mod) => mod.lessons.length < 5) ||
+                                !form.getValues("thumbnail")
                               }>
                               <Eye className="w-4 h-4 mr-2" />
                               Publish Course
@@ -1010,53 +1300,77 @@ export default function CreateCourse() {
                           </div>
                         </CardContent>
                       </Card>
-                    </div>
-                  </motion.div>
-                )}
+                    </motion.div>
+                  )}
 
-                {/* Navigation Buttons */}
-                <div className="flex justify-between pt-8 border-t border-white/10">
-                  <Button
-                    onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
-                    disabled={currentStep === 0}
-                    variant="outline"
-                    className="border-white/20 text-white hover:bg-white/10">
-                    Previous
-                  </Button>
-
-                  <div className="flex gap-4">
+                  <div className="flex justify-between pt-8 border-t border-white/10">
                     <Button
-                      onClick={handleSaveDraft}
+                      type="button"
+                      onClick={() =>
+                        setCurrentStep(Math.max(0, currentStep - 1))
+                      }
+                      disabled={currentStep === 0}
                       variant="outline"
-                      className="border-white/20 text-white hover:bg-white/10 bg-transparent">
-                      <Save className="w-4 h-4 mr-2" />
-                      Save Draft
+                      className="border-white/20 text-white hover:bg-white/10">
+                      Previous
                     </Button>
-
-                    {currentStep < steps.length - 1 ? (
+                    <div className="flex gap-4">
                       <Button
+                        type="button"
                         onClick={() =>
-                          setCurrentStep(
-                            Math.min(steps.length - 1, currentStep + 1)
-                          )
+                          form.handleSubmit((data) => onSubmit(data, false))()
                         }
-                        className="bg-gradient-to-r from-neon-blue to-neon-purple">
-                        Next
+                        variant="outline"
+                        className="border-white/20 text-white hover:bg-white/10 bg-transparent">
+                        <Save className="w-4 h-4 mr-2" />
+                        Save Draft
                       </Button>
-                    ) : (
-                      <Button
-                        onClick={handlePublish}
-                        className="bg-gradient-to-r from-neon-green to-emerald-400"
-                        disabled={!courseData.title || !courseData.description}>
-                        <Eye className="w-4 h-4 mr-2" />
-                        Publish Course
-                      </Button>
-                    )}
+                      {currentStep < steps.length - 1 ? (
+                        <Button
+                          type="button"
+                          onClick={() =>
+                            setCurrentStep(
+                              Math.min(steps.length - 1, currentStep + 1)
+                            )
+                          }
+                          className="bg-gradient-to-r from-neon-blue to-neon-purple">
+                          Next
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          onClick={() =>
+                            form.handleSubmit(
+                              (data) => {
+                                console.log("✅ Validated data:", data);
+                                onSubmit(data, true);
+                              },
+                              (errors) => {
+                                console.error("❌ Validation errors:", errors);
+                                toast.error(
+                                  "Validation failed, check console for details"
+                                );
+                              }
+                            )()
+                          }
+                          className="bg-gradient-to-r from-neon-green to-emerald-400"
+                          disabled={
+                            !form.getValues("title") ||
+                            !form.getValues("description") ||
+                            modules.length === 0 ||
+                            modules.some((mod) => mod.lessons.length < 5) ||
+                            !form.getValues("thumbnail")
+                          }>
+                          <Eye className="w-4 h-4 mr-2" />
+                          Publish Course
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                </CardContent>
+              </Card>
+            </form>
+          </Form>
         </div>
       </section>
     </div>

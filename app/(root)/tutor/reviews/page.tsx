@@ -45,13 +45,14 @@ import {
   Bar,
 } from "recharts";
 import type { UserRole } from "@/types/user";
+import { generateRandomAvatar } from "@/lib/utils";
 
 const reviews = [
   {
     id: 1,
     student: {
       name: "Sarah Johnson",
-      avatar: "/placeholder.svg?height=40&width=40",
+      avatar: generateRandomAvatar(),
       initials: "SJ",
     },
     course: "Advanced React Patterns",
@@ -67,7 +68,7 @@ const reviews = [
     id: 2,
     student: {
       name: "Mike Chen",
-      avatar: "/placeholder.svg?height=40&width=40",
+      avatar: generateRandomAvatar(),
       initials: "MC",
     },
     course: "JavaScript Fundamentals",
@@ -86,7 +87,7 @@ const reviews = [
     id: 3,
     student: {
       name: "Emily Rodriguez",
-      avatar: "/placeholder.svg?height=40&width=40",
+      avatar: generateRandomAvatar(),
       initials: "ER",
     },
     course: "Node.js Backend Development",
@@ -123,7 +124,7 @@ const ratingDistribution = [
 export default function TutorReviewsPage() {
   const [userRole] = useState<UserRole>("TUTOR");
   const [userName] = useState("Sarah Chen");
-  const [userAvatar] = useState("/placeholder.svg?height=40&width=40");
+  const [userAvatar] = useState(generateRandomAvatar());
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRating, setSelectedRating] = useState("all");
@@ -151,7 +152,7 @@ export default function TutorReviewsPage() {
   });
 
   const handleReply = (reviewId: number) => {
-    console.log(`Replying to review ${reviewId} with: ${replyText}`);
+    console.log(`Replying to review ₦{reviewId} with: ₦{replyText}`);
     setReplyingTo(null);
     setReplyText("");
   };
@@ -160,7 +161,7 @@ export default function TutorReviewsPage() {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`w-4 h-4 ${
+        className={`w-4 h-4 ₦{
           i < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-500"
         }`}
       />
@@ -177,7 +178,7 @@ export default function TutorReviewsPage() {
               <p className="text-3xl font-bold text-white mt-2">{value}</p>
               {change && (
                 <div
-                  className={`flex items-center mt-2 text-sm ${
+                  className={`flex items-center mt-2 text-sm ₦{
                     change > 0 ? "text-green-400" : "text-red-400"
                   }`}>
                   <TrendingUp className="w-4 h-4 mr-1" />
@@ -187,12 +188,12 @@ export default function TutorReviewsPage() {
               )}
             </div>
             <div
-              className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${color} p-4 group-hover:scale-110 transition-transform duration-300`}>
+              className={`w-16 h-16 rounded-2xl bg-gradient-to-r ₦{color} p-4 group-hover:scale-110 transition-transform duration-300`}>
               <Icon className="w-full h-full text-white" />
             </div>
           </div>
           <motion.div
-            className={`absolute inset-0 bg-gradient-to-r ${color} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}
+            className={`absolute inset-0 bg-gradient-to-r ₦{color} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}
           />
         </CardContent>
       </Card>
@@ -269,7 +270,7 @@ export default function TutorReviewsPage() {
               <StatCard
                 icon={Reply}
                 title="Response Rate"
-                value={`${responseRate}%`}
+                value={`₦{responseRate}%`}
                 change={null}
                 color="from-neon-green to-emerald-400"
               />
@@ -442,7 +443,8 @@ export default function TutorReviewsPage() {
                               <Avatar>
                                 <AvatarImage
                                   src={
-                                    review.student.avatar || "/placeholder.svg"
+                                    review.student.avatar ||
+                                    generateRandomAvatar()
                                   }
                                 />
                                 <AvatarFallback className="bg-gradient-to-r from-neon-blue to-neon-purple text-white">

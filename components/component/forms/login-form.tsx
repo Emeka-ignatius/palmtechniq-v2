@@ -1,6 +1,6 @@
 "use client";
 
-import { login } from "@/app/actions/auth";
+import { login } from "@/actions/auth";
 import { OAuthButtons } from "@/components/auth/oauth-buttons";
 import FormError from "@/components/shared/form-error";
 import FormSuccess from "@/components/shared/form-success";
@@ -26,6 +26,8 @@ import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
+import { debounce } from "lodash";
+import { useSession } from "next-auth/react";
 
 export function LoginForm() {
   const searchParams = useSearchParams();
@@ -43,6 +45,7 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const { update } = useSession();
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -51,27 +54,29 @@ export function LoginForm() {
       password: "",
     },
   });
-  const onSubmit = (data: z.infer<typeof loginSchema>) => {
+  const onSubmit = debounce((data: z.infer<typeof loginSchema>) => {
     if (isCooldown) return;
     setError(""), setSuccess("");
     setIsCooldown(true);
     setTimeout(() => setIsCooldown(false), 2000);
     setIsLoading(true);
 
-    startTransition(() => {
-      login(data, callbackUrl).then((data) => {
-        console.log({ data });
-        if (data?.error) {
-          setError(data?.error);
-          toast.error(data.error);
-        } else if (data?.success) {
-          toast.success(data?.success);
-          router.push(String(data.redirectUrl));
-          router.refresh();
-        }
-      });
+    startTransition(async () => {
+      const result = await login(data, callbackUrl);
+      console.log({ data: result });
+      if (result?.error) {
+        setError(result.error);
+        toast.error(result.error);
+      } else if (result?.success) {
+        await update();
+        setSuccess(result.success);
+        toast.success(result.success);
+        // router.push(String(result.redirectUrl));
+        router.refresh();
+      }
+      setIsLoading(false);
     });
-  };
+  }, 300);
 
   return (
     <div className="space-y-6">
@@ -148,8 +153,6 @@ export function LoginForm() {
               )}
             />
           </motion.div>
-          <FormError message={error} />
-          <FormSuccess message={success} />
 
           {/* Remember Me & Forgot Password */}
           <motion.div
@@ -176,6 +179,9 @@ export function LoginForm() {
               Forgot password?
             </Link>
           </motion.div>
+
+          <FormError message={error} />
+          <FormSuccess message={success} />
 
           {/* Submit Button */}
           <motion.div

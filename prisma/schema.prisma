@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -115,6 +112,7 @@ model Tutor {
   completionRate Float     @default(0)
   availability   Json? // Weekly schedule
   timezone       String?
+  Course         Course[]
 
   @@map("tutors")
 }
@@ -136,55 +134,73 @@ model Admin {
 // ================================
 
 model Course {
-  id               String             @id @default(cuid())
-  title            String
-  slug             String             @unique
-  description      String
-  thumbnail        String?
-  trailer          String?
-  price            Float
-  salePrice        Float?
-  currency         String             @default("USD")
-  level            CourseLevel        @default(BEGINNER)
-  status           CourseStatus       @default(DRAFT)
-  language         String             @default("en")
-  duration         Int // total minutes
-  totalLessons     Int                @default(0)
-  totalQuizzes     Int                @default(0)
-  totalProjects    Int                @default(0)
-  tags             String[]
-  requirements     String[]
-  outcomes         String[]
-  targetAudience   String[]
-  metaTitle        String?
-  metaDescription  String?
-  publishedAt      DateTime?
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  virtualPrice     Float
-  physicalPrice    Float
-  certificate      Boolean
-  categoryId       String
-  category         Category           @relation(fields: [categoryId], references: [id])
-  creatorId        String
-  creator          User               @relation("CourseCreator", fields: [creatorId], references: [id])
-  ownerId          String?
-  owner            User?              @relation("CourseOwner", fields: [ownerId], references: [id])
-  modules          CourseModule[]
-  enrollments      Enrollment[]
-  reviews          Review[]
-  cartItems        CartItem[]
-  transactions     Transaction[]
-  certificates     Certificate[]
-  discussions      Discussion[]
-  analytics        CourseAnalytics[]
-  projects         Project[]
-  wishlist         Wishlist[]
-  LearningPath     LearningPath[]
-  Skill            Skill[]
-  AIRecommendation AIRecommendation[] @relation("CourseRecommendations")
+  id                  String             @id @default(cuid())
+  title               String
+  slug                String?            @unique
+  description         String
+  subtitle            String
+  basePrice           Float? // Base price for dynamic pricing
+  currentPrice        Float? // Current price after discounts
+  demandLevel         String? // e.g., "low", "medium", "high"
+  isFlashSale         Boolean            @default(false)
+  flashSaleEnd        DateTime? // End date for flash sale
+  groupBuyingEnabled  Boolean            @default(false)
+  groupBuyingDiscount Float? // Percentage, e.g., 0.5 for 50%
+  previewVideo        String?
+  thumbnail           String?
+  trailer             String?
+  price               Float
+  salePrice           Float?
+  currency            String             @default("NGN")
+  level               CourseLevel        @default(BEGINNER)
+  status              CourseStatus       @default(DRAFT)
+  language            String             @default("en")
+  duration            Int? // total minutes
+  totalLessons        Int                @default(0)
+  totalQuizzes        Int                @default(0)
+  totalProjects       Int                @default(0)
+  tags                CourseTag[]
+  requirements        String[]
+  outcomes            String[]
+  targetAudience      String[]
+  metaTitle           String?
+  metaDescription     String?
+  publishedAt         DateTime?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  virtualPrice        Float?
+  physicalPrice       Float?
+  certificate         Boolean?           @default(false)
+  categoryId          String
+  tutorId             String
+  tutor               Tutor?             @relation(fields: [tutorId], references: [id])
+  category            Category           @relation(fields: [categoryId], references: [id])
+  creatorId           String
+  creator             User               @relation("CourseCreator", fields: [creatorId], references: [id])
+  ownerId             String?
+  owner               User?              @relation("CourseOwner", fields: [ownerId], references: [id])
+  modules             CourseModule[]
+  enrollments         Enrollment[]
+  reviews             Review[]
+  cartItems           CartItem[]
+  transactions        Transaction[]
+  certificates        Certificate[]
+  discussions         Discussion[]
+  analytics           CourseAnalytics[]
+  projects            Project[]
+  wishlist            Wishlist[]
+  LearningPath        LearningPath[]
+  Skill               Skill[]
+  AIRecommendation    AIRecommendation[] @relation("CourseRecommendations")
 
   @@map("courses")
+}
+
+model CourseTag {
+  id       String @id @default(cuid())
+  name     String
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id])
 }
 
 model Category {
@@ -212,6 +228,7 @@ model Category {
 model CourseModule {
   id          String  @id @default(cuid())
   title       String
+  content     String?
   description String?
   sortOrder   Int
   duration    Int // minutes

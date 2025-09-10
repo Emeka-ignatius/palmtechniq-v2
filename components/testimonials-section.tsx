@@ -5,12 +5,13 @@ import { Star, Quote } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { generateRandomAvatar } from "@/lib/utils";
 
 const testimonials = [
   {
     name: "Sarah Chen",
     role: "Software Engineer",
-    avatar: "/placeholder.svg?height=60&width=60",
+    avatar: generateRandomAvatar(),
     rating: 5,
     text: "The AI interview coach completely transformed my preparation. I landed my dream job at a tech company after just 3 months of practice!",
     course: "Full Stack Development",
@@ -19,7 +20,7 @@ const testimonials = [
   {
     name: "Marcus Johnson",
     role: "UX Designer",
-    avatar: "/placeholder.svg?height=60&width=60",
+    avatar: generateRandomAvatar(),
     rating: 5,
     text: "The mentorship program is incredible. Having 1-on-1 sessions with industry experts gave me insights I couldn't get anywhere else.",
     course: "UI/UX Design Mastery",
@@ -28,7 +29,7 @@ const testimonials = [
   {
     name: "Elena Rodriguez",
     role: "Data Scientist",
-    avatar: "/placeholder.svg?height=60&width=60",
+    avatar: generateRandomAvatar(),
     rating: 5,
     text: "The project-based learning approach helped me build a portfolio that impressed every interviewer. The AI LinkedIn builder was a game-changer!",
     course: "AI & Machine Learning",
@@ -37,7 +38,7 @@ const testimonials = [
   {
     name: "David Kim",
     role: "Marketing Director",
-    avatar: "/placeholder.svg?height=60&width=60",
+    avatar: generateRandomAvatar(),
     rating: 5,
     text: "I loved the hybrid learning model. Being able to attend physical workshops while taking online courses gave me the best of both worlds.",
     course: "Digital Marketing Pro",
@@ -46,7 +47,7 @@ const testimonials = [
   {
     name: "Priya Patel",
     role: "Product Manager",
-    avatar: "/placeholder.svg?height=60&width=60",
+    avatar: generateRandomAvatar(),
     rating: 5,
     text: "The progress tracking and personalized recommendations kept me motivated throughout my learning journey. Absolutely revolutionary!",
     course: "Product Management",
@@ -55,7 +56,7 @@ const testimonials = [
   {
     name: "Alex Thompson",
     role: "Blockchain Developer",
-    avatar: "/placeholder.svg?height=60&width=60",
+    avatar: generateRandomAvatar(),
     rating: 5,
     text: "The quality of instruction and the cutting-edge curriculum helped me transition into blockchain development seamlessly.",
     course: "Blockchain Development",
@@ -132,7 +133,7 @@ export function TestimonialsSection() {
 
                   {/* Course Badge */}
                   <Badge
-                    className={`bg-gradient-to-r ${testimonial.gradient} text-white border-none mb-6`}>
+                    className={`bg-gradient-to-r ₦{testimonial.gradient} text-white border-none mb-6`}>
                     {testimonial.course}
                   </Badge>
 
@@ -140,11 +141,11 @@ export function TestimonialsSection() {
                   <div className="flex items-center">
                     <Avatar className="w-12 h-12 mr-4">
                       <AvatarImage
-                        src={testimonial.avatar || "/placeholder.svg"}
+                        src={testimonial.avatar || generateRandomAvatar()}
                         alt={testimonial.name}
                       />
                       <AvatarFallback
-                        className={`bg-gradient-to-r ${testimonial.gradient} text-white`}>
+                        className={`bg-gradient-to-r ₦{testimonial.gradient} text-white`}>
                         {testimonial.name
                           .split(" ")
                           .map((n) => n[0])
@@ -163,7 +164,7 @@ export function TestimonialsSection() {
 
                   {/* Hover Gradient */}
                   <motion.div
-                    className={`absolute inset-0 bg-gradient-to-r ${testimonial.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}
+                    className={`absolute inset-0 bg-gradient-to-r ₦{testimonial.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}
                   />
                 </CardContent>
               </Card>

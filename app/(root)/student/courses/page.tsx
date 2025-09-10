@@ -24,11 +24,12 @@ import {
   Share2,
 } from "lucide-react";
 import type { UserRole } from "@/types/user";
+import { generateRandomAvatar } from "@/lib/utils";
 
 export default function StudentCourses() {
   const [userRole] = useState<UserRole>("STUDENT");
   const [userName] = useState("Alex Johnson");
-  const [userAvatar] = useState("/placeholder.svg?height=40&width=40");
+  const [userAvatar] = useState(generateRandomAvatar());
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("enrolled");
 
@@ -37,13 +38,13 @@ export default function StudentCourses() {
       id: 1,
       title: "Advanced React Patterns",
       instructor: "Sarah Chen",
-      instructorAvatar: "/placeholder.svg?height=40&width=40",
+      instructorAvatar: generateRandomAvatar(),
       progress: 68,
       totalLessons: 24,
       completedLessons: 16,
       nextLesson: "Custom Hooks Deep Dive",
       timeLeft: "2h 30m",
-      thumbnail: "/placeholder.svg?height=200&width=300",
+      thumbnail: generateRandomAvatar(),
       difficulty: "Advanced",
       rating: 4.9,
       students: 1234,
@@ -55,13 +56,13 @@ export default function StudentCourses() {
       id: 2,
       title: "Node.js Backend Development",
       instructor: "Mike Rodriguez",
-      instructorAvatar: "/placeholder.svg?height=40&width=40",
+      instructorAvatar: generateRandomAvatar(),
       progress: 34,
       totalLessons: 32,
       completedLessons: 11,
       nextLesson: "Express.js Fundamentals",
       timeLeft: "4h 15m",
-      thumbnail: "/placeholder.svg?height=200&width=300",
+      thumbnail: generateRandomAvatar(),
       difficulty: "Intermediate",
       rating: 4.8,
       students: 892,
@@ -73,13 +74,13 @@ export default function StudentCourses() {
       id: 3,
       title: "Python Machine Learning",
       instructor: "Dr. Emily Watson",
-      instructorAvatar: "/placeholder.svg?height=40&width=40",
+      instructorAvatar: generateRandomAvatar(),
       progress: 12,
       totalLessons: 28,
       completedLessons: 3,
       nextLesson: "Data Preprocessing",
       timeLeft: "8h 45m",
-      thumbnail: "/placeholder.svg?height=200&width=300",
+      thumbnail: generateRandomAvatar(),
       difficulty: "Advanced",
       rating: 4.9,
       students: 567,
@@ -94,10 +95,10 @@ export default function StudentCourses() {
       id: 4,
       title: "Vue.js Complete Guide",
       instructor: "Alex Thompson",
-      instructorAvatar: "/placeholder.svg?height=40&width=40",
+      instructorAvatar: generateRandomAvatar(),
       price: 89,
       originalPrice: 129,
-      thumbnail: "/placeholder.svg?height=200&width=300",
+      thumbnail: generateRandomAvatar(),
       difficulty: "Intermediate",
       rating: 4.7,
       students: 2341,
@@ -111,10 +112,10 @@ export default function StudentCourses() {
       id: 5,
       title: "AWS Cloud Architecture",
       instructor: "David Kim",
-      instructorAvatar: "/placeholder.svg?height=40&width=40",
+      instructorAvatar: generateRandomAvatar(),
       price: 149,
       originalPrice: 199,
-      thumbnail: "/placeholder.svg?height=200&width=300",
+      thumbnail: generateRandomAvatar(),
       difficulty: "Advanced",
       rating: 4.8,
       students: 1876,
@@ -128,10 +129,10 @@ export default function StudentCourses() {
       id: 6,
       title: "UI/UX Design Masterclass",
       instructor: "Jessica Park",
-      instructorAvatar: "/placeholder.svg?height=40&width=40",
+      instructorAvatar: generateRandomAvatar(),
       price: 79,
       originalPrice: 119,
-      thumbnail: "/placeholder.svg?height=200&width=300",
+      thumbnail: generateRandomAvatar(),
       difficulty: "Beginner",
       rating: 4.9,
       students: 3421,
@@ -148,9 +149,9 @@ export default function StudentCourses() {
       id: 7,
       title: "JavaScript Fundamentals",
       instructor: "John Smith",
-      instructorAvatar: "/placeholder.svg?height=40&width=40",
+      instructorAvatar: generateRandomAvatar(),
       completedDate: "2 weeks ago",
-      thumbnail: "/placeholder.svg?height=200&width=300",
+      thumbnail: generateRandomAvatar(),
       difficulty: "Beginner",
       rating: 4.6,
       finalGrade: "A+",
@@ -161,9 +162,9 @@ export default function StudentCourses() {
       id: 8,
       title: "HTML & CSS Mastery",
       instructor: "Lisa Johnson",
-      instructorAvatar: "/placeholder.svg?height=40&width=40",
+      instructorAvatar: generateRandomAvatar(),
       completedDate: "1 month ago",
-      thumbnail: "/placeholder.svg?height=200&width=300",
+      thumbnail: generateRandomAvatar(),
       difficulty: "Beginner",
       rating: 4.5,
       finalGrade: "A",
@@ -188,7 +189,7 @@ export default function StudentCourses() {
       <Card className="glass-card hover-glow border-white/10 overflow-hidden h-full">
         <div className="relative">
           <img
-            src={course.thumbnail || "/placeholder.svg"}
+            src={course.thumbnail || generateRandomAvatar()}
             alt={course.title}
             className="w-full h-48 object-cover"
           />
@@ -241,7 +242,7 @@ export default function StudentCourses() {
         <CardContent className="p-6">
           <div className="flex items-start justify-between mb-3">
             <Badge
-              className={`text-xs ${
+              className={`text-xs ₦{
                 course.difficulty === "Advanced"
                   ? "bg-red-500/20 text-red-400 border-red-500/30"
                   : course.difficulty === "Intermediate"
@@ -265,7 +266,7 @@ export default function StudentCourses() {
           <div className="flex items-center gap-2 mb-4">
             <Avatar className="w-8 h-8">
               <AvatarImage
-                src={course.instructorAvatar || "/placeholder.svg"}
+                src={course.instructorAvatar || generateRandomAvatar()}
               />
               <AvatarFallback className="bg-gradient-to-r from-neon-blue to-neon-purple text-white text-xs">
                 {course.instructor
@@ -313,10 +314,10 @@ export default function StudentCourses() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl font-bold text-white">
-                    ${course.price}
+                    ₦{course.price}
                   </span>
                   <span className="text-gray-400 line-through">
-                    ${course.originalPrice}
+                    ₦{course.originalPrice}
                   </span>
                 </div>
                 <Badge className="bg-green-500/20 text-green-400 border-green-500/30">

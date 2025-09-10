@@ -1,37 +1,40 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Bot, Sparkles, Zap } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Bot, Sparkles, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface AILessonTriggerProps {
-  lessonId: string
-  lessonTitle: string
-  onActivate: () => void
-  isActive?: boolean
+  lessonId: string;
+  lessonTitle: string;
+  onActivate: () => void;
+  isActive?: boolean;
 }
 
-export function AILessonTrigger({ lessonId, lessonTitle, onActivate, isActive = false }: AILessonTriggerProps) {
-  const [isHovered, setIsHovered] = useState(false)
+export function AILessonTrigger({
+  lessonId,
+  lessonTitle,
+  onActivate,
+  isActive = false,
+}: AILessonTriggerProps) {
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
-      className="relative"
-    >
+      className="relative">
       <Button
         onClick={onActivate}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className={`relative overflow-hidden bg-gradient-to-r from-neon-blue/20 to-neon-purple/20 border border-neon-blue/30 text-neon-blue hover:from-neon-blue/30 hover:to-neon-purple/30 hover:border-neon-blue/50 transition-all duration-300 ${
+        className={`relative overflow-hidden bg-gradient-to-r from-neon-blue/20 to-neon-purple/20 border border-neon-blue/30 text-neon-blue hover:from-neon-blue/30 hover:to-neon-purple/30 hover:border-neon-blue/50 transition-all duration-300 ₦{
           isActive ? "ring-2 ring-neon-blue/50" : ""
         }`}
-        size="sm"
-      >
+        size="sm">
         <motion.div
           className="absolute inset-0 bg-gradient-to-r from-neon-blue/10 to-neon-purple/10"
           animate={{
@@ -52,8 +55,7 @@ export function AILessonTrigger({ lessonId, lessonTitle, onActivate, isActive = 
             transition={{
               duration: 0.5,
               ease: "easeInOut",
-            }}
-          >
+            }}>
             <Bot className="w-4 h-4" />
           </motion.div>
           <span className="font-medium">Ask AI</span>
@@ -64,8 +66,7 @@ export function AILessonTrigger({ lessonId, lessonTitle, onActivate, isActive = 
             transition={{
               duration: 0.5,
               repeat: isHovered ? Number.POSITIVE_INFINITY : 0,
-            }}
-          >
+            }}>
             <Sparkles className="w-3 h-3" />
           </motion.div>
         </div>
@@ -94,13 +95,12 @@ export function AILessonTrigger({ lessonId, lessonTitle, onActivate, isActive = 
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ delay: 0.5, duration: 0.3 }}
-        className="absolute -top-2 -right-2"
-      >
+        className="absolute -top-2 -right-2">
         <Badge className="bg-gradient-to-r from-neon-orange to-pink-400 text-white text-xs px-1.5 py-0.5 animate-pulse">
           <Zap className="w-2 h-2 mr-1" />
           NEW
         </Badge>
       </motion.div>
     </motion.div>
-  )
+  );
 }

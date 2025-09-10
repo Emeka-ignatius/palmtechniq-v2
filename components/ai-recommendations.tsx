@@ -1,12 +1,21 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Brain, TrendingUp, Target, Zap, Star, Clock, Users, ArrowRight } from "lucide-react"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Brain,
+  TrendingUp,
+  Target,
+  Zap,
+  Star,
+  Clock,
+  Users,
+  ArrowRight,
+} from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 // AI Recommendations Widget
 export function AIRecommendations() {
@@ -50,7 +59,7 @@ export function AIRecommendations() {
       confidence: 92,
       salaryIncrease: "60%",
     },
-  ])
+  ]);
 
   return (
     <section className="py-16 relative">
@@ -60,15 +69,17 @@ export function AIRecommendations() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
-        >
+          className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
             <Brain className="w-8 h-8 text-neon-blue mr-3" />
             <h2 className="text-4xl font-bold">
-              <span className="text-gradient">AI-Powered</span> <span className="text-white">Recommendations</span>
+              <span className="text-gradient">AI-Powered</span>{" "}
+              <span className="text-white">Recommendations</span>
             </h2>
           </div>
-          <p className="text-xl text-gray-300">Personalized course suggestions based on your learning journey</p>
+          <p className="text-xl text-gray-300">
+            Personalized course suggestions based on your learning journey
+          </p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -80,8 +91,7 @@ export function AIRecommendations() {
               transition={{ duration: 0.6, delay: index * 0.2 }}
               viewport={{ once: true }}
               whileHover={{ scale: 1.05, rotateY: 5 }}
-              className="group"
-            >
+              className="group">
               <Card className="glass-card hover-glow h-full border-white/10 overflow-hidden relative">
                 {/* AI Confidence Badge */}
                 <div className="absolute top-4 right-4 z-10">
@@ -93,7 +103,7 @@ export function AIRecommendations() {
 
                 <div className="relative">
                   <img
-                    src={course.thumbnail || "/placeholder.svg"}
+                    src={course.thumbnail || generateRandomAvatar()}
                     alt={course.title}
                     className="w-full h-32 object-cover"
                   />
@@ -107,16 +117,22 @@ export function AIRecommendations() {
 
                   <div className="flex items-center mb-3">
                     <Avatar className="w-6 h-6 mr-2">
-                      <AvatarFallback className="text-xs">{course.instructor.charAt(0)}</AvatarFallback>
+                      <AvatarFallback className="text-xs">
+                        {course.instructor.charAt(0)}
+                      </AvatarFallback>
                     </Avatar>
-                    <span className="text-gray-300 text-sm">{course.instructor}</span>
+                    <span className="text-gray-300 text-sm">
+                      {course.instructor}
+                    </span>
                   </div>
 
                   {/* AI Reason */}
                   <div className="bg-neon-blue/10 border border-neon-blue/30 rounded-lg p-3 mb-4">
                     <div className="flex items-center mb-1">
                       <Target className="w-4 h-4 text-neon-blue mr-2" />
-                      <span className="text-neon-blue text-sm font-semibold">Why this course?</span>
+                      <span className="text-neon-blue text-sm font-semibold">
+                        Why this course?
+                      </span>
                     </div>
                     <p className="text-gray-300 text-xs">{course.reason}</p>
                   </div>
@@ -140,13 +156,19 @@ export function AIRecommendations() {
                   {/* Salary Impact */}
                   <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-2 mb-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-green-400 text-sm font-semibold">Potential Impact:</span>
-                      <span className="text-green-400 font-bold">+{course.salaryIncrease} salary</span>
+                      <span className="text-green-400 text-sm font-semibold">
+                        Potential Impact:
+                      </span>
+                      <span className="text-green-400 font-bold">
+                        +{course.salaryIncrease} salary
+                      </span>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-gradient">${course.price}</span>
+                    <span className="text-2xl font-bold text-gradient">
+                      ₦{course.price}
+                    </span>
                     <Button className="bg-gradient-to-r from-neon-blue to-neon-purple hover:from-neon-blue/80 hover:to-neon-purple/80 text-white">
                       Enroll Now
                       <ArrowRight className="w-4 h-4 ml-2" />
@@ -159,7 +181,7 @@ export function AIRecommendations() {
         </div>
       </div>
     </section>
-  )
+  );
 }
 
 // Learning Path Recommendations
@@ -172,7 +194,7 @@ export function LearningPathRecommendations() {
       courses: 6,
       duration: "8 months",
       difficulty: "Beginner to Advanced",
-      salaryRange: "$70k - $120k",
+      salaryRange: "₦70k - ₦120k",
       icon: Zap,
       color: "from-blue-500 to-cyan-400",
       completion: 33,
@@ -184,7 +206,7 @@ export function LearningPathRecommendations() {
       courses: 8,
       duration: "10 months",
       difficulty: "Intermediate to Expert",
-      salaryRange: "$90k - $150k",
+      salaryRange: "₦90k - ₦150k",
       icon: Brain,
       color: "from-purple-500 to-pink-400",
       completion: 0,
@@ -196,12 +218,12 @@ export function LearningPathRecommendations() {
       courses: 5,
       duration: "6 months",
       difficulty: "Intermediate",
-      salaryRange: "$80k - $130k",
+      salaryRange: "₦80k - ₦130k",
       icon: TrendingUp,
       color: "from-green-500 to-emerald-400",
       completion: 0,
     },
-  ]
+  ];
 
   return (
     <section className="py-16 bg-gradient-to-r from-neon-blue/5 via-transparent to-neon-purple/5">
@@ -211,12 +233,14 @@ export function LearningPathRecommendations() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
-        >
+          className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4">
-            <span className="text-white">Recommended</span> <span className="text-gradient">Learning Paths</span>
+            <span className="text-white">Recommended</span>{" "}
+            <span className="text-gradient">Learning Paths</span>
           </h2>
-          <p className="text-xl text-gray-300">Structured journeys to your dream career</p>
+          <p className="text-xl text-gray-300">
+            Structured journeys to your dream career
+          </p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -228,11 +252,11 @@ export function LearningPathRecommendations() {
               transition={{ duration: 0.6, delay: index * 0.2 }}
               viewport={{ once: true }}
               whileHover={{ scale: 1.05 }}
-              className="group"
-            >
+              className="group">
               <Card className="glass-card hover-glow h-full border-white/10 overflow-hidden relative">
                 <CardHeader className="pb-4">
-                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${path.color} p-4 mb-4`}>
+                  <div
+                    className={`w-16 h-16 rounded-2xl bg-gradient-to-r ₦{path.color} p-4 mb-4`}>
                     <path.icon className="w-full h-full text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-white group-hover:text-gradient transition-all duration-300">
@@ -257,7 +281,9 @@ export function LearningPathRecommendations() {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-400">Salary Range:</span>
-                      <span className="text-green-400 font-semibold">{path.salaryRange}</span>
+                      <span className="text-green-400 font-semibold">
+                        {path.salaryRange}
+                      </span>
                     </div>
                   </div>
 
@@ -265,21 +291,22 @@ export function LearningPathRecommendations() {
                     <div className="mb-6">
                       <div className="flex justify-between text-sm mb-2">
                         <span className="text-gray-400">Progress:</span>
-                        <span className="text-neon-blue">{path.completion}%</span>
+                        <span className="text-neon-blue">
+                          {path.completion}%
+                        </span>
                       </div>
                       <div className="w-full bg-gray-700 rounded-full h-2">
                         <div
-                          className={`bg-gradient-to-r ${path.color} h-2 rounded-full transition-all duration-300`}
-                          style={{ width: `${path.completion}%` }}
+                          className={`bg-gradient-to-r ₦{path.color} h-2 rounded-full transition-all duration-300`}
+                          style={{ width: `₦{path.completion}%` }}
                         />
                       </div>
                     </div>
                   )}
 
                   <Button
-                    className={`w-full bg-gradient-to-r ${path.color} hover:opacity-80 text-white`}
-                    disabled={path.completion > 0}
-                  >
+                    className={`w-full bg-gradient-to-r ₦{path.color} hover:opacity-80 text-white`}
+                    disabled={path.completion > 0}>
                     {path.completion > 0 ? "Continue Path" : "Start Path"}
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
@@ -290,5 +317,5 @@ export function LearningPathRecommendations() {
         </div>
       </div>
     </section>
-  )
+  );
 }

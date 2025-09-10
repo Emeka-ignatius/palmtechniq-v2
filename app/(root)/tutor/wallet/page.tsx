@@ -49,6 +49,7 @@ import {
   Cell,
 } from "recharts";
 import type { UserRole } from "@/types/user";
+import { generateRandomAvatar } from "@/lib/utils";
 
 const earningsData = [
   { month: "Jan", courses: 2400, mentorship: 1200, projects: 800 },
@@ -111,7 +112,7 @@ const transactions = [
 export default function TutorWalletPage() {
   const [userRole] = useState<UserRole>("TUTOR");
   const [userName] = useState("Sarah Chen");
-  const [userAvatar] = useState("/placeholder.svg?height=40&width=40");
+  const [userAvatar] = useState(generateRandomAvatar());
   const [activeTab, setActiveTab] = useState("overview");
   const [withdrawalAmount, setWithdrawalAmount] = useState("");
 
@@ -130,7 +131,7 @@ export default function TutorWalletPage() {
               <p className="text-3xl font-bold text-white mt-2">{value}</p>
               {change && (
                 <div
-                  className={`flex items-center mt-2 text-sm ${
+                  className={`flex items-center mt-2 text-sm ₦{
                     change > 0 ? "text-green-400" : "text-red-400"
                   }`}>
                   <TrendingUp className="w-4 h-4 mr-1" />
@@ -140,12 +141,12 @@ export default function TutorWalletPage() {
               )}
             </div>
             <div
-              className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${color} p-4 group-hover:scale-110 transition-transform duration-300`}>
+              className={`w-16 h-16 rounded-2xl bg-gradient-to-r ₦{color} p-4 group-hover:scale-110 transition-transform duration-300`}>
               <Icon className="w-full h-full text-white" />
             </div>
           </div>
           <motion.div
-            className={`absolute inset-0 bg-gradient-to-r ${color} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}
+            className={`absolute inset-0 bg-gradient-to-r ₦{color} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}
           />
         </CardContent>
       </Card>
@@ -208,28 +209,28 @@ export default function TutorWalletPage() {
               <StatCard
                 icon={Wallet}
                 title="Available Balance"
-                value={`$${totalBalance.toLocaleString()}`}
+                value={`₦₦{totalBalance.toLocaleString()}`}
                 change={monthlyGrowth}
                 color="from-neon-green to-emerald-400"
               />
               <StatCard
                 icon={PiggyBank}
                 title="Total Earnings"
-                value={`$${totalEarnings.toLocaleString()}`}
+                value={`₦₦{totalEarnings.toLocaleString()}`}
                 change={null}
                 color="from-neon-blue to-cyan-400"
               />
               <StatCard
                 icon={Clock}
                 title="Pending Earnings"
-                value={`$${pendingEarnings.toLocaleString()}`}
+                value={`₦₦{pendingEarnings.toLocaleString()}`}
                 change={null}
                 color="from-neon-purple to-pink-400"
               />
               <StatCard
                 icon={Calendar}
                 title="This Month"
-                value="$3,240"
+                value="₦3,240"
                 change={15}
                 color="from-neon-orange to-yellow-400"
               />
@@ -346,7 +347,7 @@ export default function TutorWalletPage() {
                               dataKey="value">
                               {revenueBreakdown.map((entry, index) => (
                                 <Cell
-                                  key={`cell-${index}`}
+                                  key={`cell-₦{index}`}
                                   fill={entry.color}
                                 />
                               ))}
@@ -374,7 +375,7 @@ export default function TutorWalletPage() {
                               </span>
                             </div>
                             <p className="text-lg font-bold text-white">
-                              ${item.value.toLocaleString()}
+                              ₦{item.value.toLocaleString()}
                             </p>
                           </div>
                         ))}
@@ -422,7 +423,7 @@ export default function TutorWalletPage() {
                             className="flex items-center justify-between p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors">
                             <div className="flex items-center gap-4">
                               <div
-                                className={`p-2 rounded-full ${
+                                className={`p-2 rounded-full ₦{
                                   transaction.type === "earning"
                                     ? "bg-green-500/20 text-green-400"
                                     : "bg-red-500/20 text-red-400"
@@ -444,12 +445,12 @@ export default function TutorWalletPage() {
                             </div>
                             <div className="flex items-center gap-3">
                               <span
-                                className={`text-lg font-bold ${
+                                className={`text-lg font-bold ₦{
                                   transaction.amount > 0
                                     ? "text-green-400"
                                     : "text-red-400"
                                 }`}>
-                                {transaction.amount > 0 ? "+" : ""}$
+                                {transaction.amount > 0 ? "+" : ""}₦
                                 {Math.abs(transaction.amount)}
                               </span>
                               <Badge
@@ -492,7 +493,7 @@ export default function TutorWalletPage() {
                           </span>
                         </div>
                         <p className="text-2xl font-bold text-green-400 mt-1">
-                          ${totalBalance.toLocaleString()}
+                          ₦{totalBalance.toLocaleString()}
                         </p>
                       </div>
 
@@ -514,14 +515,14 @@ export default function TutorWalletPage() {
                             size="sm"
                             onClick={() => setWithdrawalAmount("1000")}
                             className="border-white/20 text-white hover:bg-white/10 bg-transparent">
-                            $1,000
+                            ₦1,000
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => setWithdrawalAmount("5000")}
                             className="border-white/20 text-white hover:bg-white/10 bg-transparent">
-                            $5,000
+                            ₦5,000
                           </Button>
                           <Button
                             variant="outline"
@@ -562,7 +563,7 @@ export default function TutorWalletPage() {
                       </div>
 
                       <Button className="w-full bg-gradient-to-r from-neon-green to-emerald-400 text-white">
-                        Withdraw ${withdrawalAmount || "0.00"}
+                        Withdraw ₦{withdrawalAmount || "0.00"}
                       </Button>
                     </CardContent>
                   </Card>

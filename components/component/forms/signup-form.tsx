@@ -22,7 +22,7 @@ import { signupSchema, type SignupFormData } from "@/schemas";
 import { OAuthButtons } from "@/components/auth/oauth-buttons";
 import Link from "next/link";
 import z from "zod";
-import { signup } from "@/app/actions/auth";
+import { signup } from "@/actions/auth";
 import {
   Form,
   FormControl,
@@ -31,17 +31,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import FormError from "@/components/shared/form-error";
+import FormSuccess from "@/components/shared/form-success";
 
 interface SignUpProps {
   watch: UseFormWatch<z.infer<typeof signupSchema>>;
 }
 
-export function SignupForm({ watch }: SignUpProps) {
+export function SignupForm() {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof signupSchema>>({
@@ -66,10 +67,11 @@ export function SignupForm({ watch }: SignUpProps) {
     startTransition(() => {
       signup(data).then((data) => {
         setError(data.error);
-        // setSuccess(data.success);
+        setSuccess(data.success);
         if (data.success) {
           form.reset();
         }
+        setIsLoading(false);
       });
     });
   };
@@ -83,7 +85,7 @@ export function SignupForm({ watch }: SignUpProps) {
       /[a-z]/.test(password),
       /[A-Z]/.test(password),
       /\d/.test(password),
-      /[@$!%*?&]/.test(password),
+      /[@₦!%*?&]/.test(password),
     ];
 
     strength = checks.filter(Boolean).length;
@@ -247,7 +249,7 @@ export function SignupForm({ watch }: SignUpProps) {
                           return (
                             <div
                               key={level}
-                              className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                              className={`h-1 flex-1 rounded-full transition-all duration-300 ₦{
                                 level <= strength
                                   ? level <= 2
                                     ? "bg-red-400"
@@ -263,7 +265,7 @@ export function SignupForm({ watch }: SignUpProps) {
                         })}
                       </div>
                       <p
-                        className={`text-sm ${
+                        className={`text-sm ₦{
                           getPasswordStrength(field.value || "").color
                         }`}>
                         {getPasswordStrength(field.value || "").label}
@@ -349,6 +351,8 @@ export function SignupForm({ watch }: SignUpProps) {
             </div>
           </motion.div>
 
+          <FormError message={error} />
+          <FormSuccess message={success} />
           {/* Submit Button */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}

@@ -52,6 +52,7 @@ import {
 import { toast } from "sonner";
 import { Navigation } from "@/components/navigation";
 import type { UserRole } from "@/types/user";
+import { generateRandomAvatar } from "@/lib/utils";
 
 interface CourseModule {
   id: string;
@@ -113,7 +114,7 @@ export default function EditCoursePage() {
 
   const [userRole] = useState<UserRole>("TUTOR");
   const [userName] = useState("Sarah Chen");
-  const [userAvatar] = useState("/placeholder.svg?height=40&width=40");
+  const [userAvatar] = useState(generateRandomAvatar());
 
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -408,7 +409,7 @@ export default function EditCoursePage() {
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-white">
-                  ${courseData.stats.totalRevenue.toLocaleString()}
+                  ₦{courseData.stats.totalRevenue.toLocaleString()}
                 </div>
                 <div className="text-gray-400 text-sm">Revenue</div>
               </div>
@@ -761,7 +762,9 @@ export default function EditCoursePage() {
                           <div className="mt-2 border-2 border-dashed border-white/20 rounded-lg p-6 text-center hover:border-white/40 transition-colors cursor-pointer">
                             {courseData.thumbnail ? (
                               <img
-                                src={courseData.thumbnail || "/placeholder.svg"}
+                                src={
+                                  courseData.thumbnail || generateRandomAvatar()
+                                }
                                 alt="Course thumbnail"
                                 className="w-full h-32 object-cover rounded-lg mb-2"
                               />
@@ -907,13 +910,13 @@ export default function EditCoursePage() {
                         <div className="grid grid-cols-2 gap-4 text-center">
                           <div className="p-4 bg-neon-blue/20 rounded-lg border border-neon-blue/30">
                             <p className="text-2xl font-bold text-neon-blue">
-                              ${courseData.price}
+                              ₦{courseData.price}
                             </p>
                             <p className="text-sm text-gray-300">Per Student</p>
                           </div>
                           <div className="p-4 bg-neon-green/20 rounded-lg border border-neon-green/30">
                             <p className="text-2xl font-bold text-neon-green">
-                              ${(courseData.price * 0.7).toFixed(2)}
+                              ₦{(courseData.price * 0.7).toFixed(2)}
                             </p>
                             <p className="text-sm text-gray-300">
                               Your Share (70%)
@@ -927,13 +930,13 @@ export default function EditCoursePage() {
                           <div className="flex justify-between text-white">
                             <span>Total Revenue:</span>
                             <span className="font-bold">
-                              ${courseData.stats.totalRevenue.toLocaleString()}
+                              ₦{courseData.stats.totalRevenue.toLocaleString()}
                             </span>
                           </div>
                           <div className="flex justify-between text-gray-300">
                             <span>Platform Fee (30%):</span>
                             <span>
-                              -$
+                              -₦
                               {(
                                 courseData.stats.totalRevenue * 0.3
                               ).toLocaleString()}
@@ -942,7 +945,7 @@ export default function EditCoursePage() {
                           <div className="flex justify-between text-neon-green font-bold">
                             <span>Your Earnings:</span>
                             <span>
-                              $
+                              ₦
                               {(
                                 courseData.stats.totalRevenue * 0.7
                               ).toLocaleString()}

@@ -35,11 +35,12 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { UserRole } from "@/types/user";
+import { generateRandomAvatar } from "@/lib/utils";
 
 export default function TutorMentorshipPage() {
   const [userRole] = useState<UserRole>("TUTOR");
   const [userName] = useState("Sarah Chen");
-  const [userAvatar] = useState("/placeholder.svg?height=40&width=40");
+  const [userAvatar] = useState(generateRandomAvatar());
   const [activeTab, setActiveTab] = useState("upcoming");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -59,7 +60,7 @@ export default function TutorMentorshipPage() {
       id: 1,
       student: {
         name: "John Doe",
-        avatar: "/placeholder.svg?height=40&width=40",
+        avatar: generateRandomAvatar(),
         email: "john@example.com",
       },
       topic: "React Hooks Deep Dive",
@@ -76,7 +77,7 @@ export default function TutorMentorshipPage() {
       id: 2,
       student: {
         name: "Maria Garcia",
-        avatar: "/placeholder.svg?height=40&width=40",
+        avatar: generateRandomAvatar(),
         email: "maria@example.com",
       },
       topic: "Code Review Session",
@@ -93,7 +94,7 @@ export default function TutorMentorshipPage() {
       id: 3,
       student: {
         name: "Alex Kim",
-        avatar: "/placeholder.svg?height=40&width=40",
+        avatar: generateRandomAvatar(),
         email: "alex@example.com",
       },
       topic: "Career Guidance",
@@ -113,7 +114,7 @@ export default function TutorMentorshipPage() {
       id: 4,
       student: {
         name: "Emma Wilson",
-        avatar: "/placeholder.svg?height=40&width=40",
+        avatar: generateRandomAvatar(),
         email: "emma@example.com",
       },
       topic: "JavaScript Fundamentals",
@@ -131,7 +132,7 @@ export default function TutorMentorshipPage() {
       id: 5,
       student: {
         name: "David Brown",
-        avatar: "/placeholder.svg?height=40&width=40",
+        avatar: generateRandomAvatar(),
         email: "david@example.com",
       },
       topic: "React Performance",
@@ -212,7 +213,9 @@ export default function TutorMentorshipPage() {
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-start space-x-4">
             <Avatar className="w-12 h-12">
-              <AvatarImage src={session.student.avatar || "/placeholder.svg"} />
+              <AvatarImage
+                src={session.student.avatar || generateRandomAvatar()}
+              />
               <AvatarFallback>
                 {session.student.name
                   .split(" ")
@@ -243,7 +246,7 @@ export default function TutorMentorshipPage() {
           </div>
           <div className="text-right">
             <div className="text-xl font-bold text-white mb-1">
-              ${session.price}
+              ₦{session.price}
             </div>
             <Badge className={getStatusColor(session.status)}>
               {session.status}
@@ -264,7 +267,7 @@ export default function TutorMentorshipPage() {
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`w-4 h-4 ${
+                    className={`w-4 h-4 ₦{
                       i < session.rating ? "fill-current" : ""
                     }`}
                   />
@@ -363,7 +366,7 @@ export default function TutorMentorshipPage() {
           </div>
           <div className="text-right">
             <div className="text-xl font-bold text-white mb-2">
-              ${topic.price}
+              ₦{topic.price}
             </div>
             <Badge
               className={
@@ -485,7 +488,7 @@ export default function TutorMentorshipPage() {
                 <CardContent className="p-6 text-center">
                   <DollarSign className="w-8 h-8 text-neon-orange mx-auto mb-2" />
                   <div className="text-2xl font-bold text-white">
-                    ${mentorshipStats.totalEarnings.toLocaleString()}
+                    ₦{mentorshipStats.totalEarnings.toLocaleString()}
                   </div>
                   <div className="text-gray-400 text-sm">Total Earnings</div>
                 </CardContent>

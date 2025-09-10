@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import type { UserRole } from "@/types/user";
 import { useCartStore } from "@/lib/store/cart-store";
 import { useNotificationsStore } from "@/lib/store/notifications-store";
+import { useSession } from "next-auth/react";
 
 interface NavItem {
   id: string;
@@ -86,7 +87,8 @@ interface MobileBottomNavProps {
   userRole: UserRole;
 }
 
-export function MobileBottomNav({ userRole }: MobileBottomNavProps) {
+export function MobileBottomNav() {
+  const { data: session, status } = useSession();
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -94,6 +96,7 @@ export function MobileBottomNav({ userRole }: MobileBottomNavProps) {
   const { getTotalItems } = useCartStore();
   const { getUnreadCount }: any = useNotificationsStore();
 
+  const userRole = (session?.user.role || "USER") as UserRole;
   const cartItems = getTotalItems();
   const unreadNotifications = useNotificationsStore(
     (state) => state.unreadCount
@@ -117,7 +120,7 @@ export function MobileBottomNav({ userRole }: MobileBottomNavProps) {
   }, [lastScrollY]);
 
   // Filter navigation items based on user role
-  const visibleItems = navigationItems
+  let visibleItems = navigationItems
     .filter((item) => item.roles.includes(userRole))
     .slice(0, 5); // Limit to 5 items for mobile
 
@@ -134,6 +137,20 @@ export function MobileBottomNav({ userRole }: MobileBottomNavProps) {
         roles: ["USER", "STUDENT"],
       };
     }
+  }
+
+  if (status !== "authenticated") {
+    visibleItems = visibleItems.map((item) =>
+      item.id === "profile"
+        ? {
+            id: "login",
+            label: "Sign In",
+            icon: User,
+            href: "/login",
+            roles: ["USER"],
+          }
+        : item
+    );
   }
 
   const isActive = (href: string) => {
@@ -166,7 +183,7 @@ export function MobileBottomNav({ userRole }: MobileBottomNavProps) {
                   href={item.href}
                   className="relative flex flex-col items-center justify-center p-2 min-w-0 flex-1">
                   <motion.div
-                    className={`relative flex flex-col items-center justify-center transition-all duration-200 ${
+                    className={`relative flex flex-col items-center justify-center transition-all duration-200 ₦{
                       active ? "text-neon-blue" : "text-gray-400"
                     }`}
                     whileTap={{ scale: 0.95 }}
@@ -189,7 +206,7 @@ export function MobileBottomNav({ userRole }: MobileBottomNavProps) {
                     {/* Icon with badge */}
                     <div className="relative">
                       <Icon
-                        className={`w-5 h-5 transition-colors ${
+                        className={`w-5 h-5 transition-colors ₦{
                           active ? "text-neon-blue" : "text-gray-400"
                         }`}
                       />
@@ -204,14 +221,16 @@ export function MobileBottomNav({ userRole }: MobileBottomNavProps) {
                       )}
 
                       {/* Special notification badge */}
-                      {item.id === "profile" && unreadNotifications > 0 && (
-                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-gray-900" />
-                      )}
+                      {item.id === "profile" &&
+                        unreadNotifications > 0 &&
+                        status === "authenticated" && (
+                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-gray-900" />
+                        )}
                     </div>
 
                     {/* Label */}
                     <span
-                      className={`text-xs mt-1 font-medium transition-colors truncate max-w-full ${
+                      className={`text-xs mt-1 font-medium transition-colors truncate max-w-full ₦{
                         active ? "text-neon-blue" : "text-gray-400"
                       }`}>
                       {item.label}

@@ -37,14 +37,13 @@ import {
 } from "lucide-react";
 import type { UserRole } from "@/types/user";
 import { useAuthStore } from "@/lib/store/auth-store";
+import { generateRandomAvatar } from "@/lib/utils";
 
 export default function Settings() {
   const { user } = useAuthStore();
   const [userRole] = useState<UserRole>(user?.role || "STUDENT");
   const [userName] = useState(user?.firstName || "John Doe");
-  const [userAvatar] = useState(
-    user?.avatar || "/placeholder.svg?height=40&width=40"
-  );
+  const [userAvatar] = useState(user?.avatar || generateRandomAvatar());
 
   const [settings, setSettings] = useState({
     // Notifications
@@ -536,7 +535,7 @@ export default function Settings() {
                         ].map((theme) => (
                           <div
                             key={theme.value}
-                            className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                            className={`p-4 rounded-lg border-2 cursor-pointer transition-all ₦{
                               settings.theme === theme.value
                                 ? "border-neon-blue bg-neon-blue/10"
                                 : "border-white/20 hover:border-white/40"
@@ -635,17 +634,17 @@ export default function Settings() {
                           {[
                             {
                               date: "Dec 1, 2023",
-                              amount: "$29.99",
+                              amount: "₦29.99",
                               status: "Paid",
                             },
                             {
                               date: "Nov 1, 2023",
-                              amount: "$29.99",
+                              amount: "₦29.99",
                               status: "Paid",
                             },
                             {
                               date: "Oct 1, 2023",
-                              amount: "$29.99",
+                              amount: "₦29.99",
                               status: "Paid",
                             },
                           ].map((invoice, index) => (

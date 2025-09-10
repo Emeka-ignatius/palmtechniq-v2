@@ -45,11 +45,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import type { UserRole } from "@/types/user";
+import { generateRandomAvatar } from "@/lib/utils";
 
 export default function TutorProjectsPage() {
   const [userRole] = useState<UserRole>("TUTOR");
   const [userName] = useState("Sarah Chen");
-  const [userAvatar] = useState("/placeholder.svg?height=40&width=40");
+  const [userAvatar] = useState(generateRandomAvatar());
   const [activeTab, setActiveTab] = useState("pending");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -70,7 +71,7 @@ export default function TutorProjectsPage() {
       title: "Todo App with React Hooks",
       student: {
         name: "Alex Kim",
-        avatar: "/placeholder.svg?height=40&width=40",
+        avatar: generateRandomAvatar(),
         email: "alex@example.com",
       },
       course: "React Crash Course",
@@ -94,7 +95,7 @@ export default function TutorProjectsPage() {
       title: "E-commerce Product Page",
       student: {
         name: "Emma Wilson",
-        avatar: "/placeholder.svg?height=40&width=40",
+        avatar: generateRandomAvatar(),
         email: "emma@example.com",
       },
       course: "Advanced React Patterns",
@@ -118,7 +119,7 @@ export default function TutorProjectsPage() {
       title: "Real-time Chat Application",
       student: {
         name: "Mike Johnson",
-        avatar: "/placeholder.svg?height=40&width=40",
+        avatar: generateRandomAvatar(),
         email: "mike@example.com",
       },
       course: "Full Stack Development",
@@ -145,7 +146,7 @@ export default function TutorProjectsPage() {
       title: "Portfolio Website",
       student: {
         name: "Lisa Rodriguez",
-        avatar: "/placeholder.svg?height=40&width=40",
+        avatar: generateRandomAvatar(),
         email: "lisa@example.com",
       },
       course: "Web Development Fundamentals",
@@ -164,7 +165,7 @@ export default function TutorProjectsPage() {
       title: "API Integration Project",
       student: {
         name: "David Brown",
-        avatar: "/placeholder.svg?height=40&width=40",
+        avatar: generateRandomAvatar(),
         email: "david@example.com",
       },
       course: "JavaScript Advanced",
@@ -257,7 +258,7 @@ export default function TutorProjectsPage() {
     type: "pending" | "graded";
   }) => (
     <Card
-      className={`glass-card border-white/10 hover-glow group ${
+      className={`glass-card border-white/10 hover-glow group ₦{
         submission.isOverdue ? "border-red-500/30" : ""
       }`}>
       <CardContent className="p-6">
@@ -265,7 +266,7 @@ export default function TutorProjectsPage() {
           <div className="flex items-start space-x-4 flex-1">
             <Avatar className="w-12 h-12">
               <AvatarImage
-                src={submission.student.avatar || "/placeholder.svg"}
+                src={submission.student.avatar || generateRandomAvatar()}
               />
               <AvatarFallback>
                 {submission.student.name
@@ -304,7 +305,7 @@ export default function TutorProjectsPage() {
             {type === "graded" && (
               <div className="mb-2">
                 <div
-                  className={`text-2xl font-bold ${getGradeColor(
+                  className={`text-2xl font-bold ₦{getGradeColor(
                     submission.grade
                   )}`}>
                   {submission.grade}
@@ -360,8 +361,8 @@ export default function TutorProjectsPage() {
               <Clock className="w-4 h-4" />
               <span>
                 {type === "pending"
-                  ? `Submitted ${submission.submittedAt}`
-                  : `Graded ${submission.gradedAt}`}
+                  ? `Submitted ₦{submission.submittedAt}`
+                  : `Graded ₦{submission.gradedAt}`}
               </span>
             </div>
             {type === "pending" && (

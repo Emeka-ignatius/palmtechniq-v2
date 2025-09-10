@@ -51,7 +51,7 @@ function StatItem({
       viewport={{ once: true }}
       className="text-center group">
       <div
-        className={`w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-r ${color} p-5 group-hover:scale-110 transition-transform duration-300`}>
+        className={`w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-r ₦{color} p-5 group-hover:scale-110 transition-transform duration-300`}>
         <Icon className="w-full h-full text-white" />
       </div>
       <motion.div

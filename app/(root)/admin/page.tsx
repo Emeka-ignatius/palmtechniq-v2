@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
+import { useState } from "react";
+import { motion } from "framer-motion";
 import {
   Users,
   BookOpen,
@@ -23,16 +23,29 @@ import {
   Edit,
   Trash2,
   Plus,
-} from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Progress } from "@/components/ui/progress"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { generateRandomAvatar } from "@/lib/utils";
 
 const statsCards = [
   {
@@ -55,7 +68,7 @@ const statsCards = [
   },
   {
     title: "Monthly Revenue",
-    value: "$125,430",
+    value: "₦125,430",
     change: "+15.3%",
     trend: "up",
     icon: DollarSign,
@@ -71,7 +84,7 @@ const statsCards = [
     color: "text-purple-400",
     bgColor: "bg-purple-500/10",
   },
-]
+];
 
 const recentUsers = [
   {
@@ -114,7 +127,7 @@ const recentUsers = [
     status: "active",
     courses: 8,
   },
-]
+];
 
 const topCourses = [
   {
@@ -122,7 +135,7 @@ const topCourses = [
     title: "Advanced React Development",
     instructor: "Sarah Johnson",
     students: 1247,
-    revenue: "$24,940",
+    revenue: "₦24,940",
     rating: 4.8,
     completion: 89,
   },
@@ -131,7 +144,7 @@ const topCourses = [
     title: "Python for Data Science",
     instructor: "Dr. Michael Chen",
     students: 987,
-    revenue: "$19,740",
+    revenue: "₦19,740",
     rating: 4.9,
     completion: 92,
   },
@@ -140,7 +153,7 @@ const topCourses = [
     title: "UI/UX Design Masterclass",
     instructor: "Emily Rodriguez",
     students: 756,
-    revenue: "$15,120",
+    revenue: "₦15,120",
     rating: 4.7,
     completion: 85,
   },
@@ -149,11 +162,11 @@ const topCourses = [
     title: "Machine Learning Fundamentals",
     instructor: "James Wilson",
     students: 654,
-    revenue: "$13,080",
+    revenue: "₦13,080",
     rating: 4.6,
     completion: 78,
   },
-]
+];
 
 const systemAlerts = [
   {
@@ -177,48 +190,48 @@ const systemAlerts = [
     message: "Daily database backup completed successfully.",
     timestamp: "3 hours ago",
   },
-]
+];
 
 export default function AdminDashboard() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedTab, setSelectedTab] = useState("overview")
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTab, setSelectedTab] = useState("overview");
 
   const getRoleColor = (role: string) => {
     switch (role) {
       case "ADMIN":
-        return "border-red-500 text-red-400 bg-red-500/10"
+        return "border-red-500 text-red-400 bg-red-500/10";
       case "TUTOR":
-        return "border-purple-500 text-purple-400 bg-purple-500/10"
+        return "border-purple-500 text-purple-400 bg-purple-500/10";
       case "STUDENT":
-        return "border-blue-500 text-blue-400 bg-blue-500/10"
+        return "border-blue-500 text-blue-400 bg-blue-500/10";
       default:
-        return "border-gray-500 text-gray-400 bg-gray-500/10"
+        return "border-gray-500 text-gray-400 bg-gray-500/10";
     }
-  }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-        return "border-green-500 text-green-400 bg-green-500/10"
+        return "border-green-500 text-green-400 bg-green-500/10";
       case "pending":
-        return "border-yellow-500 text-yellow-400 bg-yellow-500/10"
+        return "border-yellow-500 text-yellow-400 bg-yellow-500/10";
       case "suspended":
-        return "border-red-500 text-red-400 bg-red-500/10"
+        return "border-red-500 text-red-400 bg-red-500/10";
       default:
-        return "border-gray-500 text-gray-400 bg-gray-500/10"
+        return "border-gray-500 text-gray-400 bg-gray-500/10";
     }
-  }
+  };
 
   const getAlertIcon = (type: string) => {
     switch (type) {
       case "warning":
-        return <AlertTriangle className="w-4 h-4 text-yellow-400" />
+        return <AlertTriangle className="w-4 h-4 text-yellow-400" />;
       case "success":
-        return <UserCheck className="w-4 h-4 text-green-400" />
+        return <UserCheck className="w-4 h-4 text-green-400" />;
       default:
-        return <Bell className="w-4 h-4 text-blue-400" />
+        return <Bell className="w-4 h-4 text-blue-400" />;
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 pt-24">
@@ -228,14 +241,20 @@ export default function AdminDashboard() {
           className="flex flex-col md:flex-row md:items-center justify-between mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
+          transition={{ duration: 0.6 }}>
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gradient mb-2">Admin Dashboard</h1>
-            <p className="text-gray-400">Manage your platform, users, and analytics from one central location</p>
+            <h1 className="text-3xl md:text-4xl font-bold text-gradient mb-2">
+              Admin Dashboard
+            </h1>
+            <p className="text-gray-400">
+              Manage your platform, users, and analytics from one central
+              location
+            </p>
           </div>
           <div className="flex items-center gap-4 mt-4 md:mt-0">
-            <Button variant="outline" className="border-neon-blue/50 hover:bg-neon-blue/10 bg-transparent">
+            <Button
+              variant="outline"
+              className="border-neon-blue/50 hover:bg-neon-blue/10 bg-transparent">
               <Download className="w-4 h-4 mr-2" />
               Export Data
             </Button>
@@ -251,29 +270,35 @@ export default function AdminDashboard() {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-        >
+          transition={{ duration: 0.6, delay: 0.1 }}>
           {statsCards.map((stat, index) => (
             <motion.div
               key={stat.title}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
+              transition={{ delay: index * 0.1 }}>
               <Card className="glass-card border-white/10 hover-glow">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-gray-400 text-sm font-medium">{stat.title}</p>
-                      <p className="text-2xl font-bold text-white mt-1">{stat.value}</p>
+                      <p className="text-gray-400 text-sm font-medium">
+                        {stat.title}
+                      </p>
+                      <p className="text-2xl font-bold text-white mt-1">
+                        {stat.value}
+                      </p>
                       <div className="flex items-center mt-2">
                         <TrendingUp className="w-3 h-3 text-green-400 mr-1" />
-                        <span className="text-green-400 text-xs font-medium">{stat.change}</span>
-                        <span className="text-gray-500 text-xs ml-1">vs last month</span>
+                        <span className="text-green-400 text-xs font-medium">
+                          {stat.change}
+                        </span>
+                        <span className="text-gray-500 text-xs ml-1">
+                          vs last month
+                        </span>
                       </div>
                     </div>
-                    <div className={`p-3 rounded-xl ${stat.bgColor}`}>
-                      <stat.icon className={`w-6 h-6 ${stat.color}`} />
+                    <div className={`p-3 rounded-xl ₦{stat.bgColor}`}>
+                      <stat.icon className={`w-6 h-6 ₦{stat.color}`} />
                     </div>
                   </div>
                 </CardContent>
@@ -286,27 +311,39 @@ export default function AdminDashboard() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
+          transition={{ duration: 0.6, delay: 0.2 }}>
+          <Tabs
+            value={selectedTab}
+            onValueChange={setSelectedTab}
+            className="space-y-6">
             <TabsList className="glass-card border-white/10 p-1">
-              <TabsTrigger value="overview" className="data-[state=active]:bg-neon-blue/20">
+              <TabsTrigger
+                value="overview"
+                className="data-[state=active]:bg-neon-blue/20">
                 <Activity className="w-4 h-4 mr-2" />
                 Overview
               </TabsTrigger>
-              <TabsTrigger value="users" className="data-[state=active]:bg-neon-blue/20">
+              <TabsTrigger
+                value="users"
+                className="data-[state=active]:bg-neon-blue/20">
                 <Users className="w-4 h-4 mr-2" />
                 Users
               </TabsTrigger>
-              <TabsTrigger value="courses" className="data-[state=active]:bg-neon-blue/20">
+              <TabsTrigger
+                value="courses"
+                className="data-[state=active]:bg-neon-blue/20">
                 <BookOpen className="w-4 h-4 mr-2" />
                 Courses
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="data-[state=active]:bg-neon-blue/20">
+              <TabsTrigger
+                value="analytics"
+                className="data-[state=active]:bg-neon-blue/20">
                 <BarChart3 className="w-4 h-4 mr-2" />
                 Analytics
               </TabsTrigger>
-              <TabsTrigger value="settings" className="data-[state=active]:bg-neon-blue/20">
+              <TabsTrigger
+                value="settings"
+                className="data-[state=active]:bg-neon-blue/20">
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
               </TabsTrigger>
@@ -320,8 +357,13 @@ export default function AdminDashboard() {
                   <Card className="glass-card border-white/10">
                     <CardHeader>
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-white">Recent Users</CardTitle>
-                        <Button variant="ghost" size="sm" className="text-neon-blue hover:text-neon-blue/80">
+                        <CardTitle className="text-white">
+                          Recent Users
+                        </CardTitle>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-neon-blue hover:text-neon-blue/80">
                           View All
                         </Button>
                       </div>
@@ -331,30 +373,45 @@ export default function AdminDashboard() {
                         {recentUsers.map((user) => (
                           <div
                             key={user.id}
-                            className="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors"
-                          >
+                            className="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors">
                             <div className="flex items-center gap-3">
                               <Avatar className="w-10 h-10">
-                                <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
+                                <AvatarImage
+                                  src={user.avatar || generateRandomAvatar()}
+                                  alt={user.name}
+                                />
                                 <AvatarFallback className="bg-gradient-to-r from-neon-blue to-neon-purple text-white">
                                   {user.name.charAt(0)}
                                 </AvatarFallback>
                               </Avatar>
                               <div>
-                                <p className="font-medium text-white">{user.name}</p>
-                                <p className="text-sm text-gray-400">{user.email}</p>
+                                <p className="font-medium text-white">
+                                  {user.name}
+                                </p>
+                                <p className="text-sm text-gray-400">
+                                  {user.email}
+                                </p>
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Badge className={getRoleColor(user.role)}>{user.role}</Badge>
-                              <Badge className={getStatusColor(user.status)}>{user.status}</Badge>
+                              <Badge className={getRoleColor(user.role)}>
+                                {user.role}
+                              </Badge>
+                              <Badge className={getStatusColor(user.status)}>
+                                {user.status}
+                              </Badge>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="w-8 h-8">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="w-8 h-8">
                                     <MoreVertical className="w-4 h-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="glass-card border-white/10">
+                                <DropdownMenuContent
+                                  align="end"
+                                  className="glass-card border-white/10">
                                   <DropdownMenuItem>
                                     <Eye className="w-4 h-4 mr-2" />
                                     View Profile
@@ -391,14 +448,19 @@ export default function AdminDashboard() {
                         {systemAlerts.map((alert) => (
                           <div
                             key={alert.id}
-                            className="p-3 rounded-lg border border-white/10 hover:bg-white/5 transition-colors"
-                          >
+                            className="p-3 rounded-lg border border-white/10 hover:bg-white/5 transition-colors">
                             <div className="flex items-start gap-3">
                               {getAlertIcon(alert.type)}
                               <div className="flex-1 min-w-0">
-                                <p className="font-medium text-white text-sm">{alert.title}</p>
-                                <p className="text-gray-400 text-xs mt-1">{alert.message}</p>
-                                <p className="text-gray-500 text-xs mt-2">{alert.timestamp}</p>
+                                <p className="font-medium text-white text-sm">
+                                  {alert.title}
+                                </p>
+                                <p className="text-gray-400 text-xs mt-1">
+                                  {alert.message}
+                                </p>
+                                <p className="text-gray-500 text-xs mt-2">
+                                  {alert.timestamp}
+                                </p>
                               </div>
                             </div>
                           </div>
@@ -412,49 +474,87 @@ export default function AdminDashboard() {
               {/* Top Courses */}
               <Card className="glass-card border-white/10">
                 <CardHeader>
-                  <CardTitle className="text-white">Top Performing Courses</CardTitle>
+                  <CardTitle className="text-white">
+                    Top Performing Courses
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow className="border-white/10">
-                          <TableHead className="text-gray-400">Course</TableHead>
-                          <TableHead className="text-gray-400">Instructor</TableHead>
-                          <TableHead className="text-gray-400">Students</TableHead>
-                          <TableHead className="text-gray-400">Revenue</TableHead>
-                          <TableHead className="text-gray-400">Rating</TableHead>
-                          <TableHead className="text-gray-400">Completion</TableHead>
-                          <TableHead className="text-gray-400">Actions</TableHead>
+                          <TableHead className="text-gray-400">
+                            Course
+                          </TableHead>
+                          <TableHead className="text-gray-400">
+                            Instructor
+                          </TableHead>
+                          <TableHead className="text-gray-400">
+                            Students
+                          </TableHead>
+                          <TableHead className="text-gray-400">
+                            Revenue
+                          </TableHead>
+                          <TableHead className="text-gray-400">
+                            Rating
+                          </TableHead>
+                          <TableHead className="text-gray-400">
+                            Completion
+                          </TableHead>
+                          <TableHead className="text-gray-400">
+                            Actions
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {topCourses.map((course) => (
-                          <TableRow key={course.id} className="border-white/10 hover:bg-white/5">
-                            <TableCell className="font-medium text-white">{course.title}</TableCell>
-                            <TableCell className="text-gray-300">{course.instructor}</TableCell>
-                            <TableCell className="text-gray-300">{course.students.toLocaleString()}</TableCell>
-                            <TableCell className="text-green-400 font-medium">{course.revenue}</TableCell>
+                          <TableRow
+                            key={course.id}
+                            className="border-white/10 hover:bg-white/5">
+                            <TableCell className="font-medium text-white">
+                              {course.title}
+                            </TableCell>
+                            <TableCell className="text-gray-300">
+                              {course.instructor}
+                            </TableCell>
+                            <TableCell className="text-gray-300">
+                              {course.students.toLocaleString()}
+                            </TableCell>
+                            <TableCell className="text-green-400 font-medium">
+                              {course.revenue}
+                            </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-1">
                                 <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                                <span className="text-gray-300">{course.rating}</span>
+                                <span className="text-gray-300">
+                                  {course.rating}
+                                </span>
                               </div>
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
-                                <Progress value={course.completion} className="w-16 h-2" />
-                                <span className="text-gray-300 text-sm">{course.completion}%</span>
+                                <Progress
+                                  value={course.completion}
+                                  className="w-16 h-2"
+                                />
+                                <span className="text-gray-300 text-sm">
+                                  {course.completion}%
+                                </span>
                               </div>
                             </TableCell>
                             <TableCell>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="w-8 h-8">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="w-8 h-8">
                                     <MoreVertical className="w-4 h-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="glass-card border-white/10">
+                                <DropdownMenuContent
+                                  align="end"
+                                  className="glass-card border-white/10">
                                   <DropdownMenuItem>
                                     <Eye className="w-4 h-4 mr-2" />
                                     View Details
@@ -484,7 +584,9 @@ export default function AdminDashboard() {
               <Card className="glass-card border-white/10">
                 <CardHeader>
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <CardTitle className="text-white">User Management</CardTitle>
+                    <CardTitle className="text-white">
+                      User Management
+                    </CardTitle>
                     <div className="flex items-center gap-4">
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -495,7 +597,9 @@ export default function AdminDashboard() {
                           className="pl-10 glass-card border-white/20 w-64"
                         />
                       </div>
-                      <Button variant="outline" className="border-neon-blue/50 bg-transparent">
+                      <Button
+                        variant="outline"
+                        className="border-neon-blue/50 bg-transparent">
                         <Filter className="w-4 h-4 mr-2" />
                         Filter
                       </Button>
@@ -505,8 +609,12 @@ export default function AdminDashboard() {
                 <CardContent>
                   <div className="text-center py-12">
                     <Users className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-400 text-lg">User Management Interface</p>
-                    <p className="text-gray-500 text-sm">Advanced user management features coming soon!</p>
+                    <p className="text-gray-400 text-lg">
+                      User Management Interface
+                    </p>
+                    <p className="text-gray-500 text-sm">
+                      Advanced user management features coming soon!
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -516,13 +624,19 @@ export default function AdminDashboard() {
             <TabsContent value="courses" className="space-y-6">
               <Card className="glass-card border-white/10">
                 <CardHeader>
-                  <CardTitle className="text-white">Course Management</CardTitle>
+                  <CardTitle className="text-white">
+                    Course Management
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-center py-12">
                     <BookOpen className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-400 text-lg">Course Management Interface</p>
-                    <p className="text-gray-500 text-sm">Comprehensive course management tools coming soon!</p>
+                    <p className="text-gray-400 text-lg">
+                      Course Management Interface
+                    </p>
+                    <p className="text-gray-500 text-sm">
+                      Comprehensive course management tools coming soon!
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -532,13 +646,17 @@ export default function AdminDashboard() {
             <TabsContent value="analytics" className="space-y-6">
               <Card className="glass-card border-white/10">
                 <CardHeader>
-                  <CardTitle className="text-white">Advanced Analytics</CardTitle>
+                  <CardTitle className="text-white">
+                    Advanced Analytics
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-center py-12">
                     <BarChart3 className="w-16 h-16 text-gray-600 mx-auto mb-4" />
                     <p className="text-gray-400 text-lg">Analytics Dashboard</p>
-                    <p className="text-gray-500 text-sm">Detailed analytics and reporting features coming soon!</p>
+                    <p className="text-gray-500 text-sm">
+                      Detailed analytics and reporting features coming soon!
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -553,9 +671,12 @@ export default function AdminDashboard() {
                 <CardContent>
                   <div className="text-center py-12">
                     <Settings className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-400 text-lg">System Configuration</p>
+                    <p className="text-gray-400 text-lg">
+                      System Configuration
+                    </p>
                     <p className="text-gray-500 text-sm">
-                      Advanced system settings and configuration options coming soon!
+                      Advanced system settings and configuration options coming
+                      soon!
                     </p>
                   </div>
                 </CardContent>
@@ -565,5 +686,5 @@ export default function AdminDashboard() {
         </motion.div>
       </div>
     </div>
-  )
+  );
 }

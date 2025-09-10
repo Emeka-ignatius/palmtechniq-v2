@@ -209,7 +209,7 @@ export function Footer() {
                 <motion.a
                   key={index}
                   href={social.href}
-                  className={`w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-gray-300 transition-all duration-300 hover:scale-110 ${social.color}`}
+                  className={`w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-gray-300 transition-all duration-300 hover:scale-110 ₦{social.color}`}
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   whileTap={{ scale: 0.95 }}>
                   <social.icon className="w-5 h-5" />

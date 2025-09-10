@@ -36,15 +36,14 @@ import {
   Instagram,
 } from "lucide-react";
 import type { UserRole } from "@/types/user";
+import { generateRandomAvatar } from "@/lib/utils";
 
 export default function TutorProfilePage() {
   const [userRole] = useState<UserRole>("TUTOR");
   const [userName] = useState("Sarah Chen");
-  const [userAvatar] = useState("/placeholder.svg?height=40&width=40");
+  const [userAvatar] = useState(generateRandomAvatar());
   const [activeTab, setActiveTab] = useState("basic");
-  const [profileImage, setProfileImage] = useState(
-    "/placeholder.svg?height=120&width=120"
-  );
+  const [profileImage, setProfileImage] = useState(generateRandomAvatar());
   const [skills, setSkills] = useState([
     "JavaScript",
     "React",
@@ -174,7 +173,7 @@ export default function TutorProfilePage() {
                         <div className="relative">
                           <Avatar className="w-24 h-24">
                             <AvatarImage
-                              src={profileImage || "/placeholder.svg"}
+                              src={profileImage || generateRandomAvatar()}
                             />
                             <AvatarFallback className="bg-gradient-to-r from-neon-blue to-neon-purple text-white">
                               SC
@@ -474,7 +473,7 @@ export default function TutorProfilePage() {
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="text-lg font-bold text-white">
-                              ${item.price}
+                              ₦{item.price}
                             </span>
                             <Button
                               variant="ghost"
