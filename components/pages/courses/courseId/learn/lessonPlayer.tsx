@@ -34,6 +34,7 @@ export default function VideoPlayer({
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(1);
+  const [isBuffering, setIsBuffering] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
 
   // Handle time updates
@@ -115,9 +116,21 @@ export default function VideoPlayer({
         poster={poster}
         className="w-full aspect-video"
         onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleLoadedMetadata}
+        onLoadedMetadata={() => {
+          handleLoadedMetadata();
+          setIsBuffering(false);
+        }}
+        onWaiting={() => setIsBuffering(true)}
+        onPlaying={() => setIsBuffering(false)}
         onEnded={handleVideoEnded}
       />
+
+      {isBuffering && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent"></div>
+        </div>
+      )}
+
       {/* Controls omitted for brevity */}
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
         <div className="flex items-center gap-4 mb-2">

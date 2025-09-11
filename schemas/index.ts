@@ -88,6 +88,7 @@ export const courseSchema = z.object({
     (val) => (val !== "" ? Number(val) : undefined),
     z.number().min(0, "Duration must be non-negative").optional()
   ) as unknown as z.ZodOptional<z.ZodNumber>,
+
   totalLessons: z
     .number()
     .min(0, "Total lessons must be non-negative")
@@ -103,6 +104,7 @@ export const courseSchema = z.object({
   ) as unknown as z.ZodOptional<z.ZodString>,
   groupBuyingEnabled: z.boolean(),
   groupBuyingDiscount: z.number().min(0).max(1).optional(),
+  certificate: z.boolean(),
 });
 
 export const moduleSchema = z.object({

@@ -7,7 +7,8 @@
     "dev": "next dev -p 2026",
     "lint": "next lint",
     "postinstall": "prisma generate",
-    "start": "next start"
+    "start": "next start",
+    "test-seed-enrollment": "tsx scripts/test-seed-enrollment.ts"
   },
   "prisma": {
     "seed": "ts-node app/prisma/seed.js"

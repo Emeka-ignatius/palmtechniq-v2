@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import { db } from "@/lib/db";
 
 export async function getPublicCourses() {
@@ -48,6 +49,7 @@ export async function getCourseById(courseId: string) {
 }
 export async function getCourseWithModules(courseId: string) {
   try {
+    const session = await auth();
     const course = await db.course.findUnique({
       where: { id: courseId },
       include: {
@@ -66,6 +68,14 @@ export async function getCourseWithModules(courseId: string) {
           include: {
             lessons: {
               orderBy: { sortOrder: "asc" },
+              include: {
+                progress: session?.user.id
+                  ? {
+                      where: { userId: session.user.id },
+                      select: { isCompleted: true, updatedAt: true },
+                    }
+                  : false,
+              },
             },
           },
           orderBy: { sortOrder: "asc" },
@@ -84,7 +94,46 @@ export async function getCourseWithModules(courseId: string) {
         category: true,
       },
     });
-    return course;
+
+    if (!course) return null;
+    const allLessons = course.modules.flatMap((m) => m.lessons);
+
+    const lastCompleted = allLessons
+      .filter((l) => l.progress.length > 0 && l.progress[0].isCompleted)
+      .pop();
+
+    let resumeLessonId = allLessons[0]?.id; // fallback: first lesson
+    if (lastCompleted) {
+      const idx = allLessons.findIndex((l) => l.id === lastCompleted.id);
+      if (idx >= 0 && idx + 1 < allLessons.length) {
+        resumeLessonId = allLessons[idx + 1].id;
+      } else {
+        resumeLessonId = lastCompleted.id; // all done → stay on last
+      }
+    }
+
+    const completedLessons = allLessons.filter(
+      (lesson) => lesson.progress?.[0]?.isCompleted
+    ).length;
+
+    const totalLessons = allLessons.length;
+    const progress =
+      totalLessons > 0
+        ? Math.round((completedLessons / totalLessons) * 100)
+        : 0;
+
+    return {
+      ...course,
+      progress,
+      resumeLessonId,
+      modules: course.modules.map((m) => ({
+        ...m,
+        lessons: m.lessons.map((l) => ({
+          ...l,
+          isCompleted: l.progress?.[0]?.isCompleted ?? false,
+        })),
+      })),
+    };
   } catch (error) {
     console.error("❌ Error fetching course with modules:", error);
     return null;

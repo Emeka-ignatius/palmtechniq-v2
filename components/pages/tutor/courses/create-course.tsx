@@ -8,6 +8,7 @@ import {
 } from "@/actions/tutor-actions";
 import FormError from "@/components/shared/form-error";
 import FormSuccess from "@/components/shared/form-success";
+import LessonUploadFile from "@/components/shared/lesson-uploader";
 import UploadFile from "@/components/shared/uploader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -109,6 +110,8 @@ export default function CreateCourse() {
     thumbnail: false,
     video: false,
   });
+  const [lessonUploading, setLessonUploading] = useState(false);
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -260,6 +263,7 @@ export default function CreateCourse() {
       description: "",
       content: "",
       isPreview: false,
+      videoUrl: "",
     };
 
     const validatedLesson = lessonSchema.safeParse(newLesson);
@@ -339,7 +343,10 @@ export default function CreateCourse() {
     setSuccess("");
 
     startTransition(() => {
-      createCourse({ ...values, isPublished }, modules)
+      createCourse(
+        { ...values, certificate: values.certificateEnabled, isPublished },
+        modules
+      )
         .then((data) => {
           if (data && "error" in data) {
             setError(data.error!);
@@ -526,9 +533,12 @@ export default function CreateCourse() {
                                     min={0}
                                     placeholder="Total course Duration in minutes"
                                     className="bg-white/10 border-white/20 text-white"
-                                    onChange={(e) =>
-                                      field.onChange(e.target.valueAsNumber)
-                                    }
+                                    onChange={(e) => {
+                                      const val = e.target.valueAsNumber;
+                                      field.onChange(
+                                        Number.isNaN(val) ? undefined : val
+                                      );
+                                    }}
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -891,7 +901,7 @@ export default function CreateCourse() {
                                   <div
                                     key={lesson.id}
                                     className="mt-4 p-4 bg-white/5 rounded-lg">
-                                    <div className="flex justify-between items-center">
+                                    <div className="flex space-y-3 justify-between items-center">
                                       <Input
                                         value={lesson.title}
                                         onChange={(e) =>
@@ -899,7 +909,7 @@ export default function CreateCourse() {
                                             title: e.target.value,
                                           })
                                         }
-                                        className="bg-transparent border-0 text-white"
+                                        className="bg-white/10 border-white/20 border-0 text-white"
                                       />
                                       <Button
                                         variant="ghost"
@@ -919,7 +929,7 @@ export default function CreateCourse() {
                                             content: e.target.value,
                                           })
                                         }
-                                        className="bg-transparent border-0 text-white"
+                                        className="bg-white/10 border-white/20 border-0 text-white"
                                       />
                                       <Button
                                         variant="ghost"
@@ -959,7 +969,7 @@ export default function CreateCourse() {
                                       className="mt-2 bg-white/10 border-white/20 text-white"
                                     />
                                     {lesson.type === "VIDEO" && (
-                                      <>
+                                      <div className="space-y-3">
                                         <Textarea
                                           value={lesson.description || ""}
                                           onChange={(e) =>
@@ -980,21 +990,16 @@ export default function CreateCourse() {
                                           placeholder="Lesson content"
                                           className="my-2 bg-white/10 border-white/20 text-white"
                                         /> */}
-                                        <UploadFile
-                                          setValue={form.setValue}
-                                          fieldName="previewVideo"
-                                          uploading={uploading.video}
-                                          setUploading={(value) =>
-                                            setUploading((prev) => ({
-                                              ...prev,
-                                              thumbnail:
-                                                typeof value === "function"
-                                                  ? value(prev.thumbnail)
-                                                  : value,
-                                            }))
-                                          }
+                                        <LessonUploadFile
+                                          uploading={lessonUploading}
+                                          setUploading={setLessonUploading}
+                                          onUploadSuccess={(url) => {
+                                            updateLesson(module.id, lesson.id, {
+                                              videoUrl: url,
+                                            });
+                                          }}
                                         />
-                                      </>
+                                      </div>
                                     )}
                                     {/* {lesson.type === "TEXT" && (
                                       <Textarea
@@ -1214,7 +1219,7 @@ export default function CreateCourse() {
                           />
                           <FormField
                             control={form.control}
-                            name="certificateEnabled"
+                            name="certificate"
                             render={({ field }) => (
                               <FormItem className="flex items-center justify-between">
                                 <div>

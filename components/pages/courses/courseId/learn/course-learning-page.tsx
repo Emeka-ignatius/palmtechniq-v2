@@ -99,6 +99,7 @@ export default function ({ courseData }: any) {
 
         {/* Sidebar */}
         <LessonSidebar
+          progress={courseData.progress}
           courseTitle={courseData.title}
           modules={courseData.modules}
           currentLessonId={currentLesson.id}

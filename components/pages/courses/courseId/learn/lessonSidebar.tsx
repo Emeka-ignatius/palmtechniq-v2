@@ -23,29 +23,30 @@ export default function LessonSidebar({
   courseTitle,
   modules,
   currentLessonId,
+  progress,
   onChangeLesson,
 }: {
   courseTitle: string;
   modules: Module[];
   currentLessonId: string;
+  progress: number;
   onChangeLesson: (lesson: Lesson) => void;
 }) {
   const allLessons = modules.flatMap((m) => m.lessons);
 
   const completedLessons = allLessons.filter((l) => l.isCompleted).length;
   const totalLessons = allLessons.length;
-  const progress =
-    totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
 
   return (
     <div className="w-80 p-6 border-l border-white/10">
       <Card className="glass-card border-white/10">
         <CardHeader>
-          <CardTitle className="text-white">{courseTitle}</CardTitle>
-          <Progress value={progress} className="mt-2" />
+          <CardTitle className="text-white text-xl">{courseTitle}</CardTitle>
+          <Progress value={progress || 0} className="mt-2" />
           <p className="text-sm text-gray-400 mt-1">
             {completedLessons} of {totalLessons} lessons completed
           </p>
+          {progress ?? 0}% completed
         </CardHeader>
 
         <CardContent>

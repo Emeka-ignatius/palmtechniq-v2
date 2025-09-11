@@ -33,9 +33,9 @@ export function Navigation() {
   const navItems = roleNavItems[role];
   return (
     <motion.nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all w-full duration-300 ₦{
+      className={`fixed top-0 left-0 right-0 z-50 transition-all w-full duration-300 ${
         isScrolled
-          ? "glass-card border-b border-white/10 backdrop-blur-2xl"
+          ? "glass-card border-b border-white/10 backdrop-blur-3xl"
           : "bg-transparent"
       }`}
       initial={{ y: -100 }}
