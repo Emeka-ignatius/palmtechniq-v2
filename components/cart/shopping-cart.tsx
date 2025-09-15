@@ -236,7 +236,7 @@ export function ShoppingCartComponent() {
                               </div>
                               <Badge
                                 variant="outline"
-                                className={`text-xs px-1 py-0 ₦{getLevelColor(
+                                className={`text-xs px-1 py-0 ${getLevelColor(
                                   item.level
                                 )}`}>
                                 {item.level}

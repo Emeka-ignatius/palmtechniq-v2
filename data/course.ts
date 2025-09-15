@@ -26,6 +26,7 @@ export async function getCourseById(courseId: string) {
           },
         },
         category: true,
+        tags: true,
         modules: {
           include: {
             lessons: true,
@@ -41,7 +42,13 @@ export async function getCourseById(courseId: string) {
         enrollments: true,
       },
     });
-    return course;
+    if (!course) return null;
+
+    return {
+      ...course,
+      tags: course.tags?.map((t) => t.name) || [],
+      learningOutcomes: course.outcomes || [],
+    };
   } catch (error) {
     console.error("Error fetching course by ID:", error);
     return null;

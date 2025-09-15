@@ -88,7 +88,7 @@ export async function login(
 ) {
   try {
     await rateLimiter({
-      key: `login:₦{values.email}`,
+      key: `login:${values.email}`,
       limit: 3,
       window: 60,
     });

@@ -1,3 +1,3 @@
-import { seedEnrollment } from "@/actions/test-seed-enrollment";
+// import { seedEnrollment } from "@/actions/test-seed-enrollment";
 
-seedEnrollment();
+// seedEnrollment();

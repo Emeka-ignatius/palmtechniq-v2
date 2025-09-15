@@ -4,11 +4,11 @@ import {
   addLessonToModule,
   addModuleToCourse,
   createCourse,
-  uploadCourseFile,
 } from "@/actions/tutor-actions";
 import FormError from "@/components/shared/form-error";
 import FormSuccess from "@/components/shared/form-success";
 import LessonUploadFile from "@/components/shared/lesson-uploader";
+import { NairaSign } from "@/components/shared/naira-sign-icon";
 import UploadFile from "@/components/shared/uploader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import {
   BookOpen,
-  DollarSign,
   Eye,
   PlayCircle,
   Plus,
@@ -135,7 +134,7 @@ export default function CreateCourse() {
       previewVideo: "",
       tags: [],
       requirements: [],
-      learningOutcomes: [],
+      outcomes: [],
       isPublished: false,
       allowDiscussions: true,
       certificateEnabled: true,
@@ -191,8 +190,8 @@ export default function CreateCourse() {
   const addLearningOutcome = (e: React.MouseEvent) => {
     e.preventDefault();
     if (currentOutcome.trim()) {
-      form.setValue("learningOutcomes", [
-        ...form.getValues("learningOutcomes"),
+      form.setValue("outcomes", [
+        ...form.getValues("outcomes"),
         currentOutcome.trim(),
       ]);
       setCurrentOutcome("");
@@ -202,8 +201,8 @@ export default function CreateCourse() {
   const removeLearningOutcome = (e: React.MouseEvent, index: number) => {
     e.preventDefault();
     form.setValue(
-      "learningOutcomes",
-      form.getValues("learningOutcomes").filter((_, i) => i !== index)
+      "outcomes",
+      form.getValues("outcomes").filter((_, i) => i !== index)
     );
   };
 
@@ -374,7 +373,7 @@ export default function CreateCourse() {
   const steps = [
     { id: 0, title: "Basic Info", icon: BookOpen },
     { id: 1, title: "Curriculum", icon: PlayCircle },
-    { id: 2, title: "Pricing", icon: DollarSign },
+    { id: 2, title: "Pricing", icon: NairaSign },
     { id: 3, title: "Settings", icon: Settings },
   ];
 
@@ -792,7 +791,7 @@ export default function CreateCourse() {
                           </div>
                           <ul className="list-disc pl-5 text-gray-300">
                             {form
-                              .getValues("learningOutcomes")
+                              .getValues("outcomes")
                               .map((outcome, index) => (
                                 <li
                                   key={index}

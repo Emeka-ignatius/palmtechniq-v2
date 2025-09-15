@@ -124,7 +124,7 @@ export function FeaturesSection() {
 
                   {/* Icon */}
                   <div
-                    className={`w-16 h-16 rounded-2xl bg-gradient-to-r ₦{feature.color} p-4 mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                    className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${feature.color} p-4 mb-6 group-hover:scale-110 transition-transform duration-300`}>
                     <feature.icon className="w-full h-full text-white" />
                   </div>
 
@@ -138,7 +138,7 @@ export function FeaturesSection() {
 
                   {/* Hover Effect */}
                   <motion.div
-                    className={`absolute inset-0 bg-gradient-to-r ₦{feature.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}
+                    className={`absolute inset-0 bg-gradient-to-r ${feature.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}
                   />
                 </CardContent>
               </Card>

@@ -197,7 +197,7 @@ export const notificationHelpers = {
     useNotificationsStore.getState().addNotification({
       type: "success",
       title: "Course Enrollment Successful",
-      message: `You've successfully enrolled in ₦{courseTitle}`,
+      message: `You've successfully enrolled in ${courseTitle}`,
       actionUrl: "/student/courses",
       actionLabel: "View Courses",
       isRead: false, // REMOVE this line if present
@@ -208,7 +208,7 @@ export const notificationHelpers = {
     useNotificationsStore.getState().addNotification({
       type: "success",
       title: "Payment Successful",
-      message: `Payment of ₦₦{amount} for ₦{courseTitle} has been processed`,
+      message: `Payment of ₦${amount} for ${courseTitle} has been processed`,
       actionUrl: "/student/courses",
       actionLabel: "View Courses",
       isRead: false, // REMOVE this line if present
@@ -219,7 +219,7 @@ export const notificationHelpers = {
     useNotificationsStore.getState().addNotification({
       type: "warning",
       title: "Assignment Due Soon",
-      message: `₦{assignmentTitle} is due on ₦{dueDate}`,
+      message: `${assignmentTitle} is due on ${dueDate}`,
       actionUrl: "/student/assignments",
       actionLabel: "View Assignment",
       isRead: false, // REMOVE this line if present
@@ -230,7 +230,7 @@ export const notificationHelpers = {
     useNotificationsStore.getState().addNotification({
       type: "info",
       title: "New Message",
-      message: `You have a new message from ₦{senderName}`,
+      message: `You have a new message from ${senderName}`,
       actionUrl: "/messages",
       actionLabel: "View Messages",
       isRead: false, // REMOVE this line if present

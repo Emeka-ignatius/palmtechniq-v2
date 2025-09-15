@@ -1,5 +1,5 @@
 import { getCategories } from "@/actions/tutor-actions";
-import { HeroSection } from "@/components/hero-section";
+import { ContactHeroSection } from "@/components/contact-hero-section";
 import CoursesGrid from "@/components/pages/courses/course-grid";
 import { getPublicCourses } from "@/data/course";
 
@@ -13,7 +13,7 @@ export default async function CoursesPage() {
 
   return (
     <div className="">
-      <HeroSection />
+      <ContactHeroSection />
       <CoursesGrid courses={courses} categories={categories} />
     </div>
   );

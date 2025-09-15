@@ -8,7 +8,7 @@ interface TestEmailProps {
 
 export function TestEmail({ email, token }: TestEmailProps) {
   const domain = process.env.NEXT_PUBLIC_URL;
-  const confrimLink = `₦{domain}/verify?token=₦{token}`;
+  const confrimLink = `${domain}/verify?token=${token}`;
 
   return (
     <Html lang="en">

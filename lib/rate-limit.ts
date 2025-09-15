@@ -1,10 +1,10 @@
 import { Redis } from "@upstash/redis";
 
 // Initialize Redis client for production (optional)
-const redis = process.env.UPSTASH_REDIS_URL
+const redis = process.env.UPSTASH_REDIS_REST_URL
   ? new Redis({
-      url: process.env.UPSTASH_REDIS_URL,
-      token: process.env.UPSTASH_REDIS_TOKEN,
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
     })
   : null;
 
@@ -12,7 +12,7 @@ const redis = process.env.UPSTASH_REDIS_URL
 const inMemoryStore = new Map<string, { count: number; resetTime: number }>();
 
 interface RateLimitOptions {
-  key: string; // Unique identifier (e.g., `login:₦{email}` or `enroll:₦{userId}`)
+  key: string; // Unique identifier (e.g., `login:${email}` or `enroll:${userId}`)
   limit: number; // Max requests allowed in the window
   window: number; // Time window in seconds
 }
@@ -43,7 +43,7 @@ export async function rateLimiter({
 
     if (redis) {
       // Production: Use Redis for distributed rate limiting
-      const redisKey = `ratelimit:₦{key}`;
+      const redisKey = `ratelimit:${key}`;
       const pipeline = redis.pipeline();
       pipeline.incr(redisKey);
       pipeline.expire(redisKey, window);
@@ -51,7 +51,7 @@ export async function rateLimiter({
 
       if (count > limit) {
         throw new RateLimitError(
-          `Rate limit exceeded for ₦{key}. Try again in ₦{window} seconds.`
+          `Rate limit exceeded for ${key}. Try again in ${window} seconds.`
         );
       }
     } else {
@@ -63,7 +63,7 @@ export async function rateLimiter({
         // Within window, check count
         if (record.count >= limit) {
           throw new RateLimitError(
-            `Rate limit exceeded for ₦{key}. Try again in ₦{Math.ceil(
+            `Rate limit exceeded for ${key}. Try again in ${Math.ceil(
               (record.resetTime - now) / 1000
             )} seconds.`
           );

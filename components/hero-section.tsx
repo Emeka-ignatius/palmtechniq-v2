@@ -1,30 +1,17 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ArrowRight, Play, Sparkles, Zap, Target } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  LiveActivityTicker,
-  LiveChatWidget,
-  SuccessStoryPopup,
-} from "./conversion-features";
-import {
-  ReferralFloatingWidget,
-  ReferralSuccessNotification,
-} from "./referral-system";
-import { DemandSurgeNotification } from "./dynamic-pricing";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import { ArrowRight, Play, Sparkles, Target, Zap } from "lucide-react";
 import Link from "next/link";
+import { LiveChatWidget } from "./conversion-features";
 
 export function HeroSection() {
   return (
     <div className="min-h-screen bg-background">
-      <LiveActivityTicker />
-      <SuccessStoryPopup />
       <LiveChatWidget />
-      <ReferralFloatingWidget />
-      <ReferralSuccessNotification />
-      <DemandSurgeNotification />
+
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden cyber-grid">
         {/* Animated Background Elements */}
         <div className="absolute inset-0">
@@ -56,7 +43,6 @@ export function HeroSection() {
 
         <div className="container mx-auto px-6 py-20 relative z-10">
           <div className="text-center max-w-5xl mx-auto">
-            {/* Badge */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -68,7 +54,6 @@ export function HeroSection() {
               </Badge>
             </motion.div>
 
-            {/* Main Heading */}
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -79,7 +64,6 @@ export function HeroSection() {
               <span className="text-gradient">Dominate.</span>
             </motion.h1>
 
-            {/* Subtitle */}
             <motion.p
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -90,7 +74,6 @@ export function HeroSection() {
               physical learning environments.
             </motion.p>
 
-            {/* CTA Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}

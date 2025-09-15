@@ -8,7 +8,7 @@ interface TestEmailProps {
 
 export function TestEmailPasswordReset({ email, token }: TestEmailProps) {
   const domain = process.env.NEXT_PUBLIC_URL;
-  const resetLink = `₦{domain}/new-password?token=₦{token}`;
+  const resetLink = `${domain}/new-password?token=${token}`;
 
   return (
     <Html lang="en">

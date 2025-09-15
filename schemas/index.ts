@@ -81,9 +81,7 @@ export const courseSchema = z.object({
   previewVideo: z.string().optional(),
   tags: z.array(z.string()),
   requirements: z.array(z.string().min(1, "Requirement cannot be empty")),
-  learningOutcomes: z.array(
-    z.string().min(1, "Learning outcome cannot be empty")
-  ),
+  outcomes: z.array(z.string().min(1, "Learning outcome cannot be empty")), // ✅ instead of learningOutcomes
   duration: z.preprocess(
     (val) => (val !== "" ? Number(val) : undefined),
     z.number().min(0, "Duration must be non-negative").optional()
@@ -105,6 +103,11 @@ export const courseSchema = z.object({
   groupBuyingEnabled: z.boolean(),
   groupBuyingDiscount: z.number().min(0).max(1).optional(),
   certificate: z.boolean(),
+  targetAudience: z
+    .array(z.string().min(1, "Audience entry cannot be empty"))
+    .optional(), // ✅ added
+  metaTitle: z.string().optional(), // ✅ added
+  metaDescription: z.string().optional(),
 });
 
 export const moduleSchema = z.object({
@@ -127,6 +130,43 @@ export const lessonSchema = z.object({
   order: z.number().min(0, "Order must be non-negative"),
   description: z.string().optional(),
   isPreview: z.boolean().default(false),
+});
+
+export const updateCourseSchema = z.object({
+  id: z.string().min(1, "Course ID is required"),
+  title: z.string().min(1, "Title is required"),
+  subtitle: z.string().min(1, "Subtitle is required"),
+  description: z.string().min(1, "Description is required"),
+  category: z.string().min(1, "Category is required"),
+  level: z.enum(["BEGINNER", "INTERMEDIATE", "ADVANCED"]),
+  language: z.string().min(1, "Language is required"),
+  price: z.number().min(0),
+  basePrice: z.number().min(0).optional(),
+  currentPrice: z.number().min(0).optional(),
+  currency: z.string().min(1),
+  thumbnail: z.string().optional(),
+  previewVideo: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  requirements: z.array(z.string().min(1)).optional(),
+  learningOutcomes: z.array(z.string().min(1)).optional(),
+  duration: z.number().min(0).optional(),
+  totalLessons: z.number().min(0).optional(),
+
+  // Advanced fields (edit-only)
+  isPublished: z.boolean().optional(),
+  allowDiscussions: z.boolean().optional(),
+  certificateEnabled: z.boolean().optional(),
+  isFlashSale: z.boolean().optional(),
+  flashSaleEnd: z.string().datetime().optional(),
+  groupBuyingEnabled: z.boolean().optional(),
+  groupBuyingDiscount: z.number().min(0).max(1).optional(),
+  certificate: z.boolean().optional(),
+
+  // 🔹 Extra fields for edit
+  targetAudience: z.array(z.string()).optional(),
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  demandLevel: z.enum(["low", "medium", "high"]).optional(),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;

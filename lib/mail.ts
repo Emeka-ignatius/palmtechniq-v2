@@ -1,6 +1,4 @@
 import { Resend } from "resend";
-import EmailVerification from "./email-templates/email-verification";
-import PasswordReset from "./email-templates/password-reset";
 import SignIn from "./email-templates/signin";
 import { TestEmail } from "./email-templates/test-email";
 import TestEmailPasswordReset from "./email-templates/test-email-password-reset";
@@ -35,7 +33,7 @@ export const sendPasswordResetToken = async (email: string, token: string) => {
   });
 };
 export const sendVerificationEmail = async (email: string, token: string) => {
-  const confrimLink = `₦{domain}/verify?token=₦{token}`;
+  const confrimLink = `${domain}/verify?token=${token}`;
 
   await resend.emails.send({
     from: "PalmTechnIQ V2 <onboarding@resend.dev>",

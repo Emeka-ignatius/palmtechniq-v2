@@ -123,7 +123,7 @@ export function PricingSection() {
               transition={{ duration: 0.8, delay: index * 0.2 }}
               viewport={{ once: true }}
               whileHover={{ scale: 1.05, rotateY: 5 }}
-              className={`group relative ₦{plan.popular ? "md:-mt-8" : ""}`}>
+              className={`group relative ${plan.popular ? "md:-mt-8" : ""}`}>
               {plan.popular && (
                 <Badge className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-neon-blue to-neon-purple text-white px-6 py-2 z-10">
                   Most Popular
@@ -131,8 +131,10 @@ export function PricingSection() {
               )}
 
               <Card
-                className={`glass-card hover-glow h-full border-white/10 overflow-hidden relative ₦{
-                  plan.popular ? "border-neon-blue/50 shadow-2xl shadow-neon-blue/20" : ""
+                className={`glass-card hover-glow h-full border-white/10 overflow-hidden relative ${
+                  plan.popular
+                    ? "border-neon-blue/50 shadow-2xl shadow-neon-blue/20"
+                    : ""
                 }`}>
                 <CardHeader className="text-center pb-8">
                   {/* Icon */}
@@ -178,7 +180,7 @@ export function PricingSection() {
 
                   {/* CTA Button */}
                   <Button
-                    className={`w-full py-6 text-lg font-semibold rounded-2xl transition-all duration-300 ₦{
+                    className={`w-full py-6 text-lg font-semibold rounded-2xl transition-all duration-300 ${
                       plan.popular
                         ? "bg-gradient-to-r from-neon-blue to-neon-purple hover:from-neon-blue/80 hover:to-neon-purple/80 text-white hover-glow"
                         : "bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/40"
@@ -189,7 +191,7 @@ export function PricingSection() {
 
                 {/* Hover Gradient */}
                 <motion.div
-                  className={`absolute inset-0 bg-gradient-to-r ₦{plan.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}
+                  className={`absolute inset-0 bg-gradient-to-r ${plan.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}
                 />
               </Card>
             </motion.div>
