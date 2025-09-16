@@ -56,7 +56,7 @@ interface CourseModule {
   content?: string;
   duration: number;
   lessons: CourseLesson[];
-  order: number;
+  sortOrder: number;
   isPublished: boolean;
 }
 
@@ -67,7 +67,7 @@ interface CourseLesson {
   duration: number;
   content?: string;
   videoUrl?: string;
-  order: number;
+  sortOrder: number;
   description?: string; // Added
   isPreview: boolean;
 }
@@ -137,7 +137,7 @@ export default function CreateCourse() {
       outcomes: [],
       isPublished: false,
       allowDiscussions: true,
-      certificateEnabled: true,
+      certificate: true,
       isFlashSale: false,
       flashSaleEnd: undefined,
       groupBuyingEnabled: false,
@@ -214,7 +214,7 @@ export default function CreateCourse() {
       content: "",
       duration: 0,
       lessons: [],
-      order: modules.length,
+      sortOrder: modules.length,
       isPublished: false,
     };
     const validatedModule = moduleSchema.safeParse(newModule);
@@ -258,7 +258,7 @@ export default function CreateCourse() {
       title: `Lesson ${module.lessons.length + 1}`,
       type: "VIDEO",
       duration: 0,
-      order: module.lessons.length,
+      sortOrder: module.lessons.length,
       description: "",
       content: "",
       isPreview: false,
@@ -343,7 +343,7 @@ export default function CreateCourse() {
 
     startTransition(() => {
       createCourse(
-        { ...values, certificate: values.certificateEnabled, isPublished },
+        { ...values, certificate: values.certificate, isPublished },
         modules
       )
         .then((data) => {

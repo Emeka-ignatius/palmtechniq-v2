@@ -40,7 +40,6 @@ export default function StickyPurchaseCard({
       className="sticky top-24">
       <Card className="glass-card border-white/10 hover-glow">
         <CardContent className="p-6">
-          {/* Enrollment Status */}
           {isEnrolled && (
             <div className="text-center mb-6 p-4 bg-green-500/20 border border-green-500/30 rounded-lg">
               <CheckCircle className="w-8 h-8 text-green-400 mx-auto mb-2" />
@@ -61,7 +60,7 @@ export default function StickyPurchaseCard({
                   </span>
                 )}
               </div>
-              {discount && (
+              {discount && discount > 0 && (
                 <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
                   {discount}% OFF
                 </Badge>

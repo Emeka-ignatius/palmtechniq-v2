@@ -7,6 +7,7 @@ import OverviewTab from "@/components/pages/courses/courseId/overviewtab";
 import ReviewsTab from "@/components/pages/courses/courseId/review-tab";
 import StickyPurchaseCard from "@/components/pages/courses/courseId/stickyPurchaseCard";
 import { getCourseById } from "@/data/course";
+import { generateRandomAvatar } from "@/lib/utils";
 
 export default async function CourseSlugPage(props: {
   params: Promise<{ courseId: string }>;
@@ -18,13 +19,31 @@ export default async function CourseSlugPage(props: {
     return <div className="">Course not found</div>;
   }
 
+  const totalDuration = course.modules?.reduce((sum, module) => {
+    return sum + (module.duration || 0);
+  }, 0);
+
+  const totalLessonDuration = course.modules?.reduce((sum, module) => {
+    return (
+      sum +
+      module.lessons.reduce((lessonSum, lesson) => {
+        return lessonSum + (lesson.duration || 0);
+      }, 0)
+    );
+  }, 0);
+
+  const totalLessons = course.modules?.reduce((sum, module) => {
+    return sum + module.lessons.length;
+  }, 0);
+
   return (
     <div className="min-h-screen bg-background">
       <div className="pt-20">
         <div className="container mx-auto py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <CourseHero
-              {...course}
+              title={course.title}
+              subtitle={course.subtitle}
               tutor={
                 course.tutor
                   ? {
@@ -35,6 +54,14 @@ export default async function CourseSlugPage(props: {
                     }
                   : { user: { name: "Unknown Tutor", image: undefined } }
               }
+              averageRating={
+                course.reviews?.length
+                  ? course.reviews.reduce((sum, r) => sum + r.rating, 0) /
+                    course.reviews.length
+                  : 0
+              }
+              totalStudents={course.enrollments?.length || 0}
+              duration={totalLessonDuration}
             />
             <CoursePreview
               thumbnail={course.thumbnail!}
@@ -61,11 +88,26 @@ export default async function CourseSlugPage(props: {
               </TabsContent>
               <TabsContent value="instructor">
                 <InstructorTab
-                  tutor={
-                    course.tutor || {
-                      user: { name: "Unknown Tutor", image: undefined },
-                    }
-                  }
+                  tutor={{
+                    user: {
+                      name: course.tutor?.user?.name || "PalmTechnIQ Tutor",
+                      image:
+                        course.tutor?.user.avatar || generateRandomAvatar(),
+                    },
+                    rating: course.reviews.length
+                      ? course.reviews.reduce((sum, r) => sum + r.rating, 0) /
+                        course.reviews.length
+                      : undefined,
+                    students: course.enrollments.length || 0,
+                    courses: course.tutor?.Course.length || 0,
+                    bio: course.tutor?.user.bio || undefined,
+                    title: course.tutor?.title || undefined,
+                  }}
+                  // tutor={
+                  //   course.tutor || {
+                  //     user: { name: "Unknown Tutor", image: undefined },
+                  //   }
+                  // }
                 />
               </TabsContent>
               <TabsContent value="reviews">
@@ -77,10 +119,18 @@ export default async function CourseSlugPage(props: {
           <div>
             <StickyPurchaseCard
               currentPrice={course.currentPrice!}
-              originalPrice={course.basePrice!}
-              discount={course.groupBuyingDiscount!}
-              duration={`${course.duration} mins`}
-              lessons={course.totalLessons}
+              originalPrice={
+                course.groupBuyingDiscount && course.groupBuyingDiscount > 0
+                  ? course.basePrice!
+                  : undefined
+              }
+              discount={
+                course.groupBuyingDiscount && course.groupBuyingDiscount > 0
+                  ? course.groupBuyingDiscount
+                  : undefined
+              }
+              duration={`${totalLessonDuration} mins`}
+              lessons={totalLessons}
               level={course.level}
               language={course.language}
               certificate={course.certificate!}

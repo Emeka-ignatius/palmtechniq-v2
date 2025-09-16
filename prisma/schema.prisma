@@ -171,6 +171,7 @@ model Course {
   virtualPrice        Float?
   physicalPrice       Float?
   certificate         Boolean?           @default(false)
+  allowDiscussions    Boolean            @default(false)
   categoryId          String
   tutorId             String
   tutor               Tutor?             @relation(fields: [tutorId], references: [id])

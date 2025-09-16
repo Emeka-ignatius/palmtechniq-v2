@@ -51,7 +51,6 @@ export async function updateCourse(
 
     const {
       isPublished: _isPublished,
-      certificateEnabled,
       allowDiscussions,
       ...safeData
     } = validatedCourse.data;
@@ -62,8 +61,9 @@ export async function updateCourse(
       where: { id: courseId },
       data: {
         ...safeData,
-        outcomes: validatedCourse.data.outcomes, // 🔄 map it here
-        certificate: validatedCourse.data.certificateEnabled,
+        outcomes: validatedCourse.data.outcomes,
+        certificate: validatedCourse.data.certificate ?? false,
+        allowDiscussions: allowDiscussions ?? false,
         status: isPublished ? "PUBLISHED" : "DRAFT",
         updatedAt: new Date(),
         category: {
@@ -84,27 +84,45 @@ export async function updateCourse(
       let savedModule;
 
       if (module.id) {
-        // Update existing module
-        savedModule = await db.courseModule.update({
+        const existingModule = await db.courseModule.findUnique({
           where: { id: module.id },
-          data: {
-            title: module.title,
-            description: module.description,
-            content: module.content,
-            duration: module.duration,
-            sortOrder: module.order,
-            isPublished: module.isPublished,
-          },
         });
+
+        if (existingModule) {
+          savedModule = await db.courseModule.update({
+            where: { id: module.id },
+            data: {
+              title: module.title,
+              description: module.description,
+              content: module.content,
+              duration: module.duration,
+              sortOrder: module.sortOrder,
+              isPublished: module.isPublished,
+            },
+          });
+        } else {
+          // Create new module
+          savedModule = await db.courseModule.create({
+            data: {
+              title: module.title,
+              description: module.description,
+              content: module.content,
+              duration: module.duration,
+              sortOrder: module.sortOrder,
+              isPublished: module.isPublished,
+              courseId,
+            },
+          });
+        }
       } else {
-        // Create new module
+        // Definitely a new module
         savedModule = await db.courseModule.create({
           data: {
             title: module.title,
             description: module.description,
             content: module.content,
             duration: module.duration,
-            sortOrder: module.order,
+            sortOrder: module.sortOrder,
             isPublished: module.isPublished,
             courseId,
           },
@@ -114,37 +132,47 @@ export async function updateCourse(
       // Lessons inside module
       for (const lesson of module.lessons || []) {
         const validatedLesson = lessonSchema.safeParse(lesson);
+        console.log("📦 Raw lesson from payload:", lesson);
+
         if (!validatedLesson.success) continue;
 
+        const l = validatedLesson.data;
+
         if (lesson.id) {
-          // Update existing lesson
-          await db.lesson.update({
+          const existingLesson = await db.lesson.findUnique({
             where: { id: lesson.id },
-            data: {
-              title: lesson.title,
-              description: lesson.description,
-              lessonType: lesson.type,
-              duration: lesson.duration,
-              content: lesson.content,
-              videoUrl: lesson.videoUrl,
-              sortOrder: lesson.order,
-              isPreview: lesson.isPreview,
-            },
           });
-        } else {
-          await db.lesson.create({
-            data: {
-              title: lesson.title,
-              description: lesson.description,
-              lessonType: lesson.type,
-              duration: lesson.duration,
-              content: lesson.content,
-              videoUrl: lesson.videoUrl,
-              sortOrder: lesson.order,
-              isPreview: lesson.isPreview,
-              moduleId: savedModule.id,
-            },
-          });
+
+          if (existingLesson) {
+            await db.lesson.update({
+              where: { id: lesson.id },
+              data: {
+                title: l.title,
+                description: l.description,
+                lessonType: l.lessonType,
+                duration: l.duration,
+                content: l.content,
+                videoUrl: l.videoUrl,
+                sortOrder: l.sortOrder,
+                isPreview: l.isPreview,
+              },
+            });
+          } else {
+            // fallback: create a new one
+            await db.lesson.create({
+              data: {
+                title: l.title,
+                description: l.description,
+                lessonType: l.lessonType,
+                duration: l.duration,
+                content: l.content ?? "",
+                videoUrl: l.videoUrl,
+                sortOrder: l.sortOrder,
+                isPreview: l.isPreview,
+                moduleId: savedModule.id,
+              },
+            });
+          }
         }
       }
     }
@@ -155,72 +183,6 @@ export async function updateCourse(
     return { error: "Something went wrong while updating the course" };
   }
 }
-
-// export async function updateCourse(input: unknown) {
-//   const parsed = updateCourseSchema.safeParse(input);
-//   if (!parsed.success) {
-//     return { success: false, error: parsed.error.flatten().fieldErrors };
-//   }
-
-//   const data = parsed.data;
-
-//   try {
-//     const updatedCourse = await db.course.update({
-//       where: { id: data.id },
-//       data: {
-//         title: data.title,
-//         subtitle: data.subtitle,
-//         description: data.description,
-//         categoryId: data.category, // ⚡ you may need to map category string → ID
-//         level: data.level,
-//         language: data.language,
-//         price: data.price,
-//         basePrice: data.basePrice,
-//         currentPrice: data.currentPrice,
-//         currency: data.currency,
-//         thumbnail: data.thumbnail,
-//         previewVideo: data.previewVideo,
-//         requirements: data.requirements,
-//         outcomes: data.learningOutcomes,
-//         duration: data.duration,
-//         totalLessons: data.totalLessons,
-//         isFlashSale: data.isFlashSale,
-//         flashSaleEnd: data.flashSaleEnd ? new Date(data.flashSaleEnd) : null,
-//         groupBuyingEnabled: data.groupBuyingEnabled,
-//         groupBuyingDiscount: data.groupBuyingDiscount,
-//         certificate: data.certificate,
-//         status: data.isPublished ? "PUBLISHED" : "DRAFT",
-
-//         // New fields
-//         targetAudience: data.targetAudience,
-//         metaTitle: data.metaTitle,
-//         metaDescription: data.metaDescription,
-//         demandLevel: data.demandLevel,
-//       },
-//     });
-
-//     return { success: true, course: updatedCourse };
-//   } catch (error) {
-//     console.error("Error updating course:", error);
-//     return { success: false, error: "Failed to update course" };
-//   }
-// }
-
-// export async function updateCourse(
-//   courseId: string,
-//   data: Partial<Pick<Course, "title" | "status">>
-// ) {
-//   try {
-//     const updatedCourse = await db.course.update({
-//       where: { id: courseId },
-//       data,
-//     });
-//     return { success: true, course: updatedCourse };
-//   } catch (error) {
-//     console.error("Error updating course:", error);
-//     return { success: false, error: "Failed to update course" };
-//   }
-// }
 
 export async function publishCourse(courseId: string) {
   try {
