@@ -54,7 +54,7 @@ export default {
     async signIn({ user, account }) {
       if (account?.provider !== "credentials") {
         const existingUser = await getUserByEmail(user.email!);
-
+        console.log({ user });
         if (!existingUser) {
           await onBoardingMail(user.email!, user.name || "");
         }

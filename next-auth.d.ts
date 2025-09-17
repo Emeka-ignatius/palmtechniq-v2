@@ -17,7 +17,8 @@ declare module "next-auth" {
     name?: string;
     email?: string;
     role?: string;
-    image?: string;
+    image?: string | null; // ✅ allow null
+    avatar?: string | null;
   }
 
   interface Session {
