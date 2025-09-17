@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-interface Notification {
+export interface Notification {
   id: string;
   type:
     | "info"
@@ -27,7 +27,7 @@ interface NotificationsState {
 
   // Actions
   addNotification: (
-    notification: Omit<Notification, "id" | "createdAt">
+    notification: Omit<Notification, "id" | "createdAt" | "isRead">
   ) => void;
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
@@ -42,59 +42,17 @@ interface NotificationsState {
   getNotificationsByType: (type: string) => Notification[];
 }
 
-// Mock notifications for demo
-const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    type: "course",
-    title: "New Course Available",
-    message: "Advanced React Patterns is now available for enrollment",
-    isRead: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-    actionUrl: "/courses/advanced-react-patterns",
-    actionLabel: "View Course",
-  },
-  {
-    id: "2",
-    type: "success",
-    title: "Payment Successful",
-    message: "Your payment for Python Masterclass has been processed",
-    isRead: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-    actionUrl: "/student/courses",
-    actionLabel: "View Courses",
-  },
-  {
-    id: "3",
-    type: "info",
-    title: "Assignment Due Soon",
-    message: "Your React project assignment is due in 2 days",
-    isRead: true,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-    actionUrl: "/student/assignments",
-    actionLabel: "View Assignment",
-  },
-  {
-    id: "3",
-    type: "system",
-    title: "Maintenance scheduled",
-    message: "System maintenance is scheduled for tonight at 2 AM EST",
-    isRead: true,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
-  },
-];
-
 export const useNotificationsStore = create<NotificationsState>()(
   persist(
     (set, get) => ({
-      notifications: mockNotifications,
-      unreadCount: mockNotifications.filter((n) => !n.isRead).length,
+      notifications: [],
+      unreadCount: 0,
       isOpen: false,
 
       addNotification: (notificationData) => {
         const notification: Notification = {
           ...notificationData,
-          id: Date.now().toString(),
+          id: Date.now().toString(), // simple unique id
           createdAt: new Date(),
           isRead: false,
         };
@@ -115,32 +73,36 @@ export const useNotificationsStore = create<NotificationsState>()(
         }
       },
 
-      markAsRead: (id: string) => {
+      markAsRead: (id) => {
         set((state) => ({
-          notifications: state.notifications.map((notification) =>
-            notification.id === id
-              ? { ...notification, isRead: true }
-              : notification
+          notifications: state.notifications.map((n) =>
+            n.id === id ? { ...n, isRead: true } : n
           ),
-          unreadCount: Math.max(0, state.unreadCount - 1),
+          unreadCount: Math.max(
+            0,
+            state.unreadCount -
+              (state.notifications.find((n) => n.id === id && !n.isRead)
+                ? 1
+                : 0)
+          ),
         }));
       },
 
       markAllAsRead: () => {
         set((state) => ({
-          notifications: state.notifications.map((notification) => ({
-            ...notification,
+          notifications: state.notifications.map((n) => ({
+            ...n,
             isRead: true,
           })),
           unreadCount: 0,
         }));
       },
 
-      removeNotification: (id: string) => {
+      removeNotification: (id) => {
         set((state) => {
-          const notification = state.notifications.find((n) => n.id === id);
-          const wasUnread = notification && !notification.isRead;
-
+          const wasUnread = state.notifications.find(
+            (n) => n.id === id && !n.isRead
+          );
           return {
             notifications: state.notifications.filter((n) => n.id !== id),
             unreadCount: wasUnread
@@ -151,35 +113,21 @@ export const useNotificationsStore = create<NotificationsState>()(
       },
 
       clearAll: () => {
-        set({
-          notifications: [],
-          unreadCount: 0,
-        });
+        set({ notifications: [], unreadCount: 0 });
       },
 
       toggleDropdown: () => {
         set((state) => ({ isOpen: !state.isOpen }));
       },
 
-      openDropdown: () => {
-        set({ isOpen: true });
-      },
+      openDropdown: () => set({ isOpen: true }),
+      closeDropdown: () => set({ isOpen: false }),
 
-      closeDropdown: () => {
-        set({ isOpen: false });
-      },
+      getUnreadNotifications: () =>
+        get().notifications.filter((n) => !n.isRead),
 
-      getUnreadNotifications: () => {
-        return get().notifications.filter(
-          (notification) => !notification.isRead
-        );
-      },
-
-      getNotificationsByType: (type: string) => {
-        return get().notifications.filter(
-          (notification) => notification.type === type
-        );
-      },
+      getNotificationsByType: (type: string) =>
+        get().notifications.filter((n) => n.type === type),
     }),
     {
       name: "notifications-storage",
@@ -191,7 +139,7 @@ export const useNotificationsStore = create<NotificationsState>()(
   )
 );
 
-// Helper functions for common notification types
+// ✅ Optional helper functions for common notification events
 export const notificationHelpers = {
   courseEnrollment: (courseTitle: string) => {
     useNotificationsStore.getState().addNotification({
@@ -200,7 +148,6 @@ export const notificationHelpers = {
       message: `You've successfully enrolled in ${courseTitle}`,
       actionUrl: "/student/courses",
       actionLabel: "View Courses",
-      isRead: false, // REMOVE this line if present
     });
   },
 
@@ -211,7 +158,6 @@ export const notificationHelpers = {
       message: `Payment of ₦${amount} for ${courseTitle} has been processed`,
       actionUrl: "/student/courses",
       actionLabel: "View Courses",
-      isRead: false, // REMOVE this line if present
     });
   },
 
@@ -222,7 +168,6 @@ export const notificationHelpers = {
       message: `${assignmentTitle} is due on ${dueDate}`,
       actionUrl: "/student/assignments",
       actionLabel: "View Assignment",
-      isRead: false, // REMOVE this line if present
     });
   },
 
@@ -233,7 +178,6 @@ export const notificationHelpers = {
       message: `You have a new message from ${senderName}`,
       actionUrl: "/messages",
       actionLabel: "View Messages",
-      isRead: false, // REMOVE this line if present
     });
   },
 };

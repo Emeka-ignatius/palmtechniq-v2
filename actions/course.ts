@@ -190,6 +190,7 @@ export async function publishCourse(courseId: string) {
       where: { id: courseId },
       data: { status: "PUBLISHED" },
     });
+
     return { success: true, course: updatedCourse };
   } catch (error) {
     console.error("Error publishing course:", error);

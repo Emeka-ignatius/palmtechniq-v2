@@ -7,6 +7,7 @@ import { Brain, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
+import { generateRandomAvatar } from "@/lib/utils";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -22,11 +23,10 @@ export function AuthLayout({
   showBackButton = false,
 }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen my-20 bg-background flex">
+    <div className="min-h-screen my-20  max-w-7xl mx-auto flex">
       {/* Left Side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-neon-blue/20 via-neon-purple/20 to-neon-pink/20" />
-        <div className="absolute inset-0 bg-[url('/placeholder.svg?height=800&width=600')] opacity-10" />
+        <div className="absolute inset-0" />
 
         <div className="relative z-10 flex flex-col justify-center items-center p-12 text-center">
           <motion.div
