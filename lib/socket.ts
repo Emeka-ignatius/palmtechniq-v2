@@ -1,13 +1,92 @@
-// lib/socket.ts
+import { Server as HttpServer } from "http";
+import { NextApiRequest } from "next";
+import { getToken } from "next-auth/jwt";
 import { Server as IOServer } from "socket.io";
+import { db } from "./db";
 
-let io: IOServer | null = null;
+type IO = IOServer | null;
 
-export function getIO() {
-  if (!io) throw new Error("Socket.IO server not initialized");
-  return io;
+declare global {
+  // eslint-disable-next-line no-var
+  var _io: IO | undefined;
 }
 
-export function setIO(newIO: IOServer) {
-  io = newIO;
+export function initIO(server: HttpServer) {
+  if (!global._io) {
+    const io = new IOServer(server, {
+      path: "/api/socket",
+      cors: {
+        origin: process.env.NEXT_PUBLIC_APP_URL || "*",
+        credentials: true,
+      },
+    });
+
+    io.use(async (socket, next) => {
+      try {
+        const cookie = socket.request.headers.cookie ?? "";
+        const req = socket.request as NextApiRequest;
+        const token = await getToken({
+          req: { headers: { cookie } },
+          secret: process.env.AUTH_SECRET,
+        });
+        if (!token?.sub) return next(new Error("Unauthorized"));
+
+        (socket.data.user = {
+          id: token.sub,
+          role: (token as any).role ?? "USER",
+        }),
+          next();
+      } catch (err) {
+        next(err as Error);
+      }
+    });
+
+    io.on("connection", async (socket) => {
+      const { id: userId, role } = socket.data.user as {
+        id: string;
+        role: string;
+      };
+
+      socket.join(`user:${userId}`);
+      socket.join(`role:${role}`);
+      try {
+        const enrollments = await db.enrollment.findMany({
+          where: { userId },
+          select: { courseId: true },
+        });
+        enrollments.forEach(({ courseId }) => {
+          socket.join(`course:${courseId}`);
+        });
+      } catch (e) {
+        console.warn("Failed to join course rooms for", userId, e);
+      }
+      console.log(
+        "✅ Client connected:",
+        socket.id,
+        "user:",
+        userId,
+        "role:",
+        role
+      );
+
+      socket.emit("notification", {
+        type: "info",
+        title: "Connected",
+        message: "You are now connected to the notification service",
+      });
+
+      socket.on("disconnect", () => {
+        console.log("❌ Client disconnected:", socket.id);
+      });
+    });
+
+    global._io = io;
+    console.log("🚀 Socket.IO initialized globally");
+  }
+
+  return global._io!;
+}
+
+export function getIO() {
+  return global._io ?? null;
 }

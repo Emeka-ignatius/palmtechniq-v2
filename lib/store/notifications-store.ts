@@ -1,20 +1,24 @@
+// lib/store/notifications-store.ts
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+export type NotificationType =
+  | "info"
+  | "success"
+  | "warning"
+  | "error"
+  | "course"
+  | "payment"
+  | "system";
+
 export interface Notification {
   id: string;
-  type:
-    | "info"
-    | "success"
-    | "warning"
-    | "error"
-    | "course"
-    | "payment"
-    | "system";
+  type: NotificationType;
   title: string;
   message: string;
   isRead: boolean;
-  createdAt: Date;
+  // Persisted as ISO string; safer than Date in localStorage
+  createdAt: string;
   actionUrl?: string;
   actionLabel?: string;
   metadata?: Record<string, any>;
@@ -22,7 +26,7 @@ export interface Notification {
 
 interface NotificationsState {
   notifications: Notification[];
-  unreadCount: number;
+  // UI only
   isOpen: boolean;
 
   // Actions
@@ -37,32 +41,67 @@ interface NotificationsState {
   openDropdown: () => void;
   closeDropdown: () => void;
 
-  // Computed
+  // Computed (derived)
+  unreadCount: () => number;
   getUnreadNotifications: () => Notification[];
-  getNotificationsByType: (type: string) => Notification[];
+  getNotificationsByType: (type: NotificationType) => Notification[];
 }
+
+// Helpers
+const genId = () =>
+  typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+const MAX_NOTIFICATIONS = 100;
+
+const shouldDedupe = (
+  a: Omit<Notification, "id" | "createdAt" | "isRead">,
+  b: Notification
+) => {
+  // Same title+message within 5s => treat as duplicate burst
+  if (a.title !== b.title || a.message !== b.message) return false;
+  const delta = Date.now() - new Date(b.createdAt).getTime();
+  return delta <= 5000;
+};
 
 export const useNotificationsStore = create<NotificationsState>()(
   persist(
     (set, get) => ({
       notifications: [],
-      unreadCount: 0,
       isOpen: false,
 
-      addNotification: (notificationData) => {
+      addNotification: (data) => {
+        const state = get();
+
+        // Optional: dedupe rapid duplicates
+        const existing = state.notifications.find((n) => shouldDedupe(data, n));
+        if (existing) {
+          // If it was unread, leave as unread; optionally bump createdAt
+          set({
+            notifications: [
+              { ...existing, createdAt: new Date().toISOString() },
+              ...state.notifications.filter((n) => n.id !== existing.id),
+            ].slice(0, MAX_NOTIFICATIONS),
+          });
+          return;
+        }
+
         const notification: Notification = {
-          ...notificationData,
-          id: Date.now().toString(), // simple unique id
-          createdAt: new Date(),
+          ...data,
+          id: genId(),
+          createdAt: new Date().toISOString(),
           isRead: false,
         };
 
-        set((state) => ({
-          notifications: [notification, ...state.notifications],
-          unreadCount: state.unreadCount + 1,
-        }));
+        set({
+          notifications: [notification, ...state.notifications].slice(
+            0,
+            MAX_NOTIFICATIONS
+          ),
+        });
 
-        // Show browser notification if permission granted
+        // Browser toast (best requested after user gesture, but allowed here if granted)
         if (typeof window !== "undefined" && "Notification" in window) {
           if (Notification.permission === "granted") {
             new Notification(notification.title, {
@@ -78,13 +117,6 @@ export const useNotificationsStore = create<NotificationsState>()(
           notifications: state.notifications.map((n) =>
             n.id === id ? { ...n, isRead: true } : n
           ),
-          unreadCount: Math.max(
-            0,
-            state.unreadCount -
-              (state.notifications.find((n) => n.id === id && !n.isRead)
-                ? 1
-                : 0)
-          ),
         }));
       },
 
@@ -94,52 +126,57 @@ export const useNotificationsStore = create<NotificationsState>()(
             ...n,
             isRead: true,
           })),
-          unreadCount: 0,
         }));
       },
 
       removeNotification: (id) => {
-        set((state) => {
-          const wasUnread = state.notifications.find(
-            (n) => n.id === id && !n.isRead
-          );
-          return {
-            notifications: state.notifications.filter((n) => n.id !== id),
-            unreadCount: wasUnread
-              ? Math.max(0, state.unreadCount - 1)
-              : state.unreadCount,
-          };
-        });
+        set((state) => ({
+          notifications: state.notifications.filter((n) => n.id !== id),
+        }));
       },
 
-      clearAll: () => {
-        set({ notifications: [], unreadCount: 0 });
-      },
+      clearAll: () => set({ notifications: [] }),
 
-      toggleDropdown: () => {
-        set((state) => ({ isOpen: !state.isOpen }));
-      },
-
+      toggleDropdown: () => set((s) => ({ isOpen: !s.isOpen })),
       openDropdown: () => set({ isOpen: true }),
       closeDropdown: () => set({ isOpen: false }),
 
+      // Derived
+      unreadCount: () => get().notifications.filter((n) => !n.isRead).length,
       getUnreadNotifications: () =>
         get().notifications.filter((n) => !n.isRead),
-
-      getNotificationsByType: (type: string) =>
+      getNotificationsByType: (type) =>
         get().notifications.filter((n) => n.type === type),
     }),
     {
       name: "notifications-storage",
       partialize: (state) => ({
         notifications: state.notifications,
-        unreadCount: state.unreadCount,
+        // don’t persist isOpen (UI state) or any computed functions
       }),
+      // Recompute or clean up on rehydrate if you need:
+      onRehydrateStorage: () => (state) => {
+        if (!state) return;
+        // Optional: trim list if older versions stored too many
+        if (state.notifications?.length > MAX_NOTIFICATIONS) {
+          state.notifications = state.notifications.slice(0, MAX_NOTIFICATIONS);
+        }
+      },
     }
   )
 );
 
-// ✅ Optional helper functions for common notification events
+// Tiny helper: request permission when opening the dropdown (call once in UI if you want)
+export async function ensureNotificationPermission() {
+  if (typeof window === "undefined" || !("Notification" in window)) return;
+  if (Notification.permission === "default") {
+    try {
+      await Notification.requestPermission();
+    } catch {}
+  }
+}
+
+// Existing helpers — unchanged API; they’ll now get uuid + ISO createdAt
 export const notificationHelpers = {
   courseEnrollment: (courseTitle: string) => {
     useNotificationsStore.getState().addNotification({
@@ -150,7 +187,6 @@ export const notificationHelpers = {
       actionLabel: "View Courses",
     });
   },
-
   paymentSuccess: (amount: number, courseTitle: string) => {
     useNotificationsStore.getState().addNotification({
       type: "success",
@@ -160,7 +196,6 @@ export const notificationHelpers = {
       actionLabel: "View Courses",
     });
   },
-
   assignmentDue: (assignmentTitle: string, dueDate: string) => {
     useNotificationsStore.getState().addNotification({
       type: "warning",
@@ -170,7 +205,6 @@ export const notificationHelpers = {
       actionLabel: "View Assignment",
     });
   },
-
   newMessage: (senderName: string) => {
     useNotificationsStore.getState().addNotification({
       type: "info",

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import { Skeleton } from "./skeleton";
 
 interface CyberToploaderProps {
   color?: string;
@@ -158,7 +159,7 @@ export function CyberToploader({
           <div className="flex items-center space-x-2 text-sm font-medium">
             <div className="text-neon-blue animate-pulse">●</div>
             <span className="text-gradient bg-gradient-to-r from-neon-blue to-neon-purple bg-clip-text text-transparent">
-              Loading...
+              <Skeleton className="w-4 h4" />
             </span>
           </div>
         </div>

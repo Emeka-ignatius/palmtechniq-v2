@@ -32,10 +32,10 @@ import { useSession } from "next-auth/react";
 export function LoginForm() {
   const searchParams = useSearchParams();
   const urlError =
-    searchParams.get("error") === "OAuthAccountNotLinked"
+    searchParams?.get("error") === "OAuthAccountNotLinked"
       ? "Email already in use with different provider!"
       : "";
-  const callbackUrl = searchParams.get("callbackUrl") ?? undefined;
+  const callbackUrl = searchParams?.get("callbackUrl") ?? undefined;
   // console.log("callback url from search params", { callbackUrl });
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");

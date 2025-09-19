@@ -2,8 +2,11 @@
 
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
+import { getIO } from "@/lib/socket";
+
 import { courseSchema, moduleSchema, lessonSchema } from "@/schemas";
 import { z } from "zod";
+import { notify } from "@/lib/notify";
 
 export async function updateCourse(
   courseId: string,
@@ -132,7 +135,7 @@ export async function updateCourse(
       // Lessons inside module
       for (const lesson of module.lessons || []) {
         const validatedLesson = lessonSchema.safeParse(lesson);
-        console.log("📦 Raw lesson from payload:", lesson);
+        // console.log("📦 Raw lesson from payload:", lesson);
 
         if (!validatedLesson.success) continue;
 
@@ -177,6 +180,28 @@ export async function updateCourse(
       }
     }
 
+    try {
+      const io = getIO();
+      if (io) {
+        await notify.course(courseId, {
+          type: "success",
+          title: "Course Updated",
+          message: `Course "${course.title}" has been updated successfully`,
+          actionUrl: `/courses/${courseId}`,
+          actionLabel: "View Course",
+        });
+        await notify.course(courseId, {
+          type: "info",
+          title: "Course Updated",
+          message: `Tutor for Course "${course.title}" has updated thier course`,
+          actionUrl: `/courses/${courseId}`,
+          actionLabel: "Checkout The Change",
+        });
+      }
+    } catch (e) {
+      console.warn("⚠️ Socket.IO not initialized yet, skipping emit");
+    }
+
     return { success: true };
   } catch (error) {
     console.error("❌ Error updating course:", error);
@@ -190,6 +215,22 @@ export async function publishCourse(courseId: string) {
       where: { id: courseId },
       data: { status: "PUBLISHED" },
     });
+
+    // 🔔 Emit notification
+    try {
+      const io = getIO();
+      if (io) {
+        io.emit("notification", {
+          type: "success",
+          title: "Course Published",
+          message: `The course "${updatedCourse.title}" is now live!`,
+          actionUrl: `/courses/${updatedCourse.id}`,
+          actionLabel: "View Course",
+        });
+      }
+    } catch (e) {
+      console.warn("⚠️ Socket.IO not initialized yet, skipping emit");
+    }
 
     return { success: true, course: updatedCourse };
   } catch (error) {
