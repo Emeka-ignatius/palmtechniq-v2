@@ -6,6 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Heart, Play, ShoppingCart, Share2 } from "lucide-react";
+import Link from "next/link";
+import CourseCheckoutDetails from "../checkout/checkout-course";
 
 export default function StickyPurchaseCard({
   currentPrice,
@@ -18,6 +20,7 @@ export default function StickyPurchaseCard({
   certificate,
   isEnrolled,
   isInCart,
+  courseId,
 }: {
   currentPrice: number;
   originalPrice?: number;
@@ -29,6 +32,7 @@ export default function StickyPurchaseCard({
   certificate: boolean;
   isEnrolled: boolean;
   isInCart: boolean;
+  courseId: string;
 }) {
   const [isWishlisted, setIsWishlisted] = useState(false);
 
@@ -84,10 +88,12 @@ export default function StickyPurchaseCard({
                   Go to Cart
                 </>
               ) : (
-                <>
+                <Link
+                  href={`/courses/${courseId}/checkout`}
+                  className="flex mx-auto items-center justify-center">
                   <CheckCircle className="w-4 h-4 mr-2" />
                   Enroll Now
-                </>
+                </Link>
               )}
             </Button>
 

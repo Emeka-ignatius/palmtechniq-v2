@@ -136,6 +136,7 @@ export default async function CourseSlugPage(props: {
               certificate={course.certificate!}
               isEnrolled={false}
               isInCart={false}
+              courseId={course.id}
             />
           </div>
         </div>
