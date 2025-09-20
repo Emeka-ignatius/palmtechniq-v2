@@ -16,7 +16,18 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-export default function CheckoutCoursePage() {
+interface CheckoutCoursePageProps {
+  instructor: any;
+  rating?: number;
+  duration?: number | null;
+}
+
+export default function CheckoutCoursePage({
+  instructor,
+  rating,
+  duration,
+}: CheckoutCoursePageProps) {
+  console.log({ instructor, rating, duration });
   return (
     <div className="min-h-screen bg-background">
       <div className="pt-20">
@@ -70,26 +81,26 @@ export default function CheckoutCoursePage() {
                             <h3 className="font-semibold text-white text-sm leading-tight mb-1"></h3>
                             <div className="flex items-center space-x-2 mb-2">
                               <Avatar className="w-5 h-5">
-                                <AvatarImage src={"/placeholder.svg"} />
+                                <AvatarImage src={instructor.avatar} />
                                 <AvatarFallback className="text-xs ">
-                                  {/* {instructor.name.charAt(0)} */}
+                                  {instructor.user.name.charAt(0)}
                                 </AvatarFallback>
                               </Avatar>
                               <span className="text-xs text-gray-400">
-                                {/* {instructor.name} */}
+                                {instructor.user.name}
                               </span>
                             </div>
                             <div className="flex items-center space-x-2">
                               <div className="flex items-center space-x-1">
                                 <Star className="w-3 h-3 text-yellow-400 fill-current" />
                                 <span className="text-xs text-gray-400">
-                                  {/* {rating} */}
+                                  {rating}
                                 </span>
                               </div>
                               <div className="flex items-center space-x-1">
                                 <Clock className="w-3 h-3 text-gray-400" />
                                 <span className="text-xs text-gray-400">
-                                  {/* {duration} */}
+                                  {duration}
                                 </span>
                               </div>
                             </div>
@@ -136,7 +147,9 @@ export default function CheckoutCoursePage() {
                               <Infinity className="w-4 h-4 text-neon-blue" />
                               <span>Lifetime</span>
                             </div>
-                            <Button className="w-full bg-gradient-to-r from-neon-blue to-neon-purple text-white text-lg py-4 disabled:opacity-50"></Button>
+                            <Button className="w-full bg-gradient-to-r from-neon-blue to-neon-purple text-white text-lg py-4 disabled:opacity-50">
+                              Proceed to Checkout
+                            </Button>
                           </div>
                         </div>
                       </CardContent>

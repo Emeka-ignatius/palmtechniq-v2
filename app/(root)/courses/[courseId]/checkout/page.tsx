@@ -1,10 +1,22 @@
 import CheckoutCoursePage from "@/components/pages/courses/checkout/checkout-course";
-import React from "react";
+import { getCourseById } from "@/data/course";
 
-export default function CheckoutPage() {
+export default async function CheckoutPage({
+  params,
+}: {
+  params: Promise<{ courseId: string }>;
+}) {
+  const p = await params;
+  const courseId = p.courseId;
+
+  const course = await getCourseById(courseId);
   return (
     <div>
-      <CheckoutCoursePage />
+      <CheckoutCoursePage
+        duration={course?.duration}
+        instructor={course?.tutor}
+        rating={course?.reviews.length}
+      />
     </div>
   );
 }
