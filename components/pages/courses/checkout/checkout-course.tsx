@@ -1,38 +1,26 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
   Shield,
-  CreditCard,
   Clock,
   Star,
-  CheckCircle,
-  Lock,
   Globe,
   Smartphone,
   Monitor,
   Infinity,
 } from "lucide-react";
-import { Navigation } from "@/components/navigation";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useAuthStore } from "@/lib/store/auth-store";
-import { useCartStore } from "@/lib/store/cart-store";
-import type { UserRole } from "@/types/user";
 
 export default function CheckoutCoursePage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="pt-20">
         <div className="container mx-auto px-6 py-12">
-          {/* Back Button */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -83,7 +71,7 @@ export default function CheckoutCoursePage() {
                             <div className="flex items-center space-x-2 mb-2">
                               <Avatar className="w-5 h-5">
                                 <AvatarImage src={"/placeholder.svg"} />
-                                <AvatarFallback className="text-xs">
+                                <AvatarFallback className="text-xs ">
                                   {/* {instructor.name.charAt(0)} */}
                                 </AvatarFallback>
                               </Avatar>
