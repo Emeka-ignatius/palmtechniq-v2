@@ -1018,6 +1018,7 @@ enum PaymentType {
   WALLET
   PAYPAL
   STRIPE
+  PAYSTACK
 }
 
 enum NotificationType {
