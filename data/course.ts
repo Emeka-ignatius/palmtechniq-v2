@@ -23,6 +23,7 @@ export async function getCourseById(courseId: string) {
         tutor: {
           include: {
             user: true,
+            Course: true,
           },
         },
         category: true,

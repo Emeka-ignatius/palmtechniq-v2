@@ -8,6 +8,7 @@ import slugify from "slugify";
 import { courseSchema, lessonSchema, moduleSchema } from "@/schemas";
 import { z } from "zod";
 import { toSlug } from "@/lib/utils";
+import { notify } from "@/lib/notify";
 
 export async function createCourse(data: any, modulesData: any[] = []) {
   const session = await auth();
@@ -71,7 +72,7 @@ export async function createCourse(data: any, modulesData: any[] = []) {
               : "low"
             : undefined,
         requirements: validatedData.data.requirements,
-        outcomes: validatedData.data.learningOutcomes,
+        outcomes: validatedData.data.outcomes,
 
         isFlashSale: validatedData.data.isFlashSale,
         duration: validatedData.data.duration,
@@ -112,7 +113,7 @@ export async function createCourse(data: any, modulesData: any[] = []) {
         data: {
           title: validatedModule.data.title,
           description: validatedModule.data.description,
-          sortOrder: validatedModule.data.order,
+          sortOrder: validatedModule.data.sortOrder,
           duration: validatedModule.data.duration || 0,
           isPublished: validatedModule.data.isPublished,
           courseId: course.id,
@@ -127,17 +128,42 @@ export async function createCourse(data: any, modulesData: any[] = []) {
         await db.lesson.create({
           data: {
             title: validatedLesson.data.title,
-            lessonType: validatedLesson.data.type,
+            lessonType: validatedLesson.data.lessonType,
             duration: validatedLesson.data.duration,
             content: validatedLesson.data.content,
             videoUrl: validatedLesson.data.videoUrl,
-            sortOrder: validatedLesson.data.order,
+            sortOrder: validatedLesson.data.sortOrder,
             description: validatedLesson.data.description,
             isPreview: validatedLesson.data.isPreview,
             moduleId: newModule.id,
           },
         });
       }
+    }
+
+    await notify.user(session.user.id, {
+      type: "success",
+      title: "Course Created",
+      message: `“${course.title}” has been created${
+        validatedData.data.isPublished ? " and published" : ""
+      }.`,
+      actionUrl: `/tutor/courses/${course.id}/edit`,
+      actionLabel: "Continue Editing",
+      metadata: { courseId: course.id },
+    });
+
+    if (validatedData.data.isPublished) {
+      await notify.role("STUDENT", {
+        type: "course",
+        title: "New Course is Live",
+        message: `“${course.title}” is now available.`,
+        actionUrl: `/courses/${course.id}`,
+        actionLabel: "View Course",
+        metadata: {
+          courseId: course.id,
+          category: validatedData.data.category,
+        },
+      });
     }
 
     return { success: true, courseId: course.id };
@@ -174,10 +200,19 @@ export async function addModuleToCourse(courseId: string, moduleData: any) {
         title: validatedModule.data.title,
         description: validatedModule.data.description,
         duration: validatedModule.data.duration || 0,
-        sortOrder: validatedModule.data.order,
+        sortOrder: validatedModule.data.sortOrder,
         isPublished: validatedModule.data.isPublished,
         courseId,
       },
+    });
+
+    await notify.course(courseId, {
+      type: "info",
+      title: "New Module Added",
+      message: `Module “${newModule.title}” was added to “${course?.title}”.`,
+      actionUrl: `/courses/${courseId}`,
+      actionLabel: "Open Course",
+      metadata: { courseId, moduleId: newModule.id },
     });
 
     return { success: true, moduleId: newModule.id };
@@ -214,15 +249,24 @@ export async function addLessonToModule(
     const newLesson = await db.lesson.create({
       data: {
         title: validatedLesson.data.title,
-        lessonType: validatedLesson.data.type,
+        lessonType: validatedLesson.data.lessonType,
         duration: validatedLesson.data.duration,
         content: validatedLesson.data.content,
         videoUrl: validatedLesson.data.videoUrl,
-        sortOrder: validatedLesson.data.order,
+        sortOrder: validatedLesson.data.sortOrder,
         description: validatedLesson.data.description,
         isPreview: validatedLesson.data.isPreview,
         moduleId,
       },
+    });
+
+    await notify.course(courseId, {
+      type: "info",
+      title: "New Lesson Added",
+      message: `Lesson “${newLesson.title}” was added to module “${module?.title}”.`,
+      actionUrl: `/courses/${courseId}`,
+      actionLabel: "Open Course",
+      metadata: { courseId, moduleId, lessonId: newLesson.id },
     });
 
     return { success: true, lessonId: newLesson.id };

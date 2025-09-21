@@ -16,6 +16,7 @@ import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { v4 as uuidv4 } from "uuid";
 
 const categories: { id: string; name: string }[] = [
   { id: "cmfar9u390000fd1gw9f75qga", name: "Web Development" },
@@ -141,12 +142,13 @@ export function CourseEditClient({
 
   const addModule = () => {
     const newModule = {
+      id: uuidv4(),
       title: `Module ${modules.length + 1}`,
       description: "",
       content: "",
       duration: 0,
       lessons: [],
-      order: modules.length,
+      sortOrder: modules.length,
       isPublished: false,
     };
     setModules([...modules, newModule]);
@@ -175,10 +177,11 @@ export function CourseEditClient({
               lessons: [
                 ...m.lessons,
                 {
+                  id: uuidv4(),
                   title: `Lesson ${m.lessons.length + 1}`,
                   type: "VIDEO",
                   duration: 0,
-                  order: m.lessons.length,
+                  sortOrder: m.lessons.length,
                   isPreview: false,
                 },
               ],

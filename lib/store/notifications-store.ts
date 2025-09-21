@@ -1,20 +1,24 @@
+// lib/store/notifications-store.ts
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-interface Notification {
+export type NotificationType =
+  | "info"
+  | "success"
+  | "warning"
+  | "error"
+  | "course"
+  | "payment"
+  | "system";
+
+export interface Notification {
   id: string;
-  type:
-    | "info"
-    | "success"
-    | "warning"
-    | "error"
-    | "course"
-    | "payment"
-    | "system";
+  type: NotificationType;
   title: string;
   message: string;
   isRead: boolean;
-  createdAt: Date;
+  // Persisted as ISO string; safer than Date in localStorage
+  createdAt: string;
   actionUrl?: string;
   actionLabel?: string;
   metadata?: Record<string, any>;
@@ -22,12 +26,12 @@ interface Notification {
 
 interface NotificationsState {
   notifications: Notification[];
-  unreadCount: number;
+  // UI only
   isOpen: boolean;
 
   // Actions
   addNotification: (
-    notification: Omit<Notification, "id" | "createdAt">
+    notification: Omit<Notification, "id" | "createdAt" | "isRead">
   ) => void;
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
@@ -37,74 +41,67 @@ interface NotificationsState {
   openDropdown: () => void;
   closeDropdown: () => void;
 
-  // Computed
+  // Computed (derived)
+  unreadCount: () => number;
   getUnreadNotifications: () => Notification[];
-  getNotificationsByType: (type: string) => Notification[];
+  getNotificationsByType: (type: NotificationType) => Notification[];
 }
 
-// Mock notifications for demo
-const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    type: "course",
-    title: "New Course Available",
-    message: "Advanced React Patterns is now available for enrollment",
-    isRead: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-    actionUrl: "/courses/advanced-react-patterns",
-    actionLabel: "View Course",
-  },
-  {
-    id: "2",
-    type: "success",
-    title: "Payment Successful",
-    message: "Your payment for Python Masterclass has been processed",
-    isRead: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-    actionUrl: "/student/courses",
-    actionLabel: "View Courses",
-  },
-  {
-    id: "3",
-    type: "info",
-    title: "Assignment Due Soon",
-    message: "Your React project assignment is due in 2 days",
-    isRead: true,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-    actionUrl: "/student/assignments",
-    actionLabel: "View Assignment",
-  },
-  {
-    id: "3",
-    type: "system",
-    title: "Maintenance scheduled",
-    message: "System maintenance is scheduled for tonight at 2 AM EST",
-    isRead: true,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
-  },
-];
+// Helpers
+const genId = () =>
+  typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+const MAX_NOTIFICATIONS = 100;
+
+const shouldDedupe = (
+  a: Omit<Notification, "id" | "createdAt" | "isRead">,
+  b: Notification
+) => {
+  // Same title+message within 5s => treat as duplicate burst
+  if (a.title !== b.title || a.message !== b.message) return false;
+  const delta = Date.now() - new Date(b.createdAt).getTime();
+  return delta <= 5000;
+};
 
 export const useNotificationsStore = create<NotificationsState>()(
   persist(
     (set, get) => ({
-      notifications: mockNotifications,
-      unreadCount: mockNotifications.filter((n) => !n.isRead).length,
+      notifications: [],
       isOpen: false,
 
-      addNotification: (notificationData) => {
+      addNotification: (data) => {
+        const state = get();
+
+        // Optional: dedupe rapid duplicates
+        const existing = state.notifications.find((n) => shouldDedupe(data, n));
+        if (existing) {
+          // If it was unread, leave as unread; optionally bump createdAt
+          set({
+            notifications: [
+              { ...existing, createdAt: new Date().toISOString() },
+              ...state.notifications.filter((n) => n.id !== existing.id),
+            ].slice(0, MAX_NOTIFICATIONS),
+          });
+          return;
+        }
+
         const notification: Notification = {
-          ...notificationData,
-          id: Date.now().toString(),
-          createdAt: new Date(),
+          ...data,
+          id: genId(),
+          createdAt: new Date().toISOString(),
           isRead: false,
         };
 
-        set((state) => ({
-          notifications: [notification, ...state.notifications],
-          unreadCount: state.unreadCount + 1,
-        }));
+        set({
+          notifications: [notification, ...state.notifications].slice(
+            0,
+            MAX_NOTIFICATIONS
+          ),
+        });
 
-        // Show browser notification if permission granted
+        // Browser toast (best requested after user gesture, but allowed here if granted)
         if (typeof window !== "undefined" && "Notification" in window) {
           if (Notification.permission === "granted") {
             new Notification(notification.title, {
@@ -115,83 +112,71 @@ export const useNotificationsStore = create<NotificationsState>()(
         }
       },
 
-      markAsRead: (id: string) => {
+      markAsRead: (id) => {
         set((state) => ({
-          notifications: state.notifications.map((notification) =>
-            notification.id === id
-              ? { ...notification, isRead: true }
-              : notification
+          notifications: state.notifications.map((n) =>
+            n.id === id ? { ...n, isRead: true } : n
           ),
-          unreadCount: Math.max(0, state.unreadCount - 1),
         }));
       },
 
       markAllAsRead: () => {
         set((state) => ({
-          notifications: state.notifications.map((notification) => ({
-            ...notification,
+          notifications: state.notifications.map((n) => ({
+            ...n,
             isRead: true,
           })),
-          unreadCount: 0,
         }));
       },
 
-      removeNotification: (id: string) => {
-        set((state) => {
-          const notification = state.notifications.find((n) => n.id === id);
-          const wasUnread = notification && !notification.isRead;
-
-          return {
-            notifications: state.notifications.filter((n) => n.id !== id),
-            unreadCount: wasUnread
-              ? Math.max(0, state.unreadCount - 1)
-              : state.unreadCount,
-          };
-        });
+      removeNotification: (id) => {
+        set((state) => ({
+          notifications: state.notifications.filter((n) => n.id !== id),
+        }));
       },
 
-      clearAll: () => {
-        set({
-          notifications: [],
-          unreadCount: 0,
-        });
-      },
+      clearAll: () => set({ notifications: [] }),
 
-      toggleDropdown: () => {
-        set((state) => ({ isOpen: !state.isOpen }));
-      },
+      toggleDropdown: () => set((s) => ({ isOpen: !s.isOpen })),
+      openDropdown: () => set({ isOpen: true }),
+      closeDropdown: () => set({ isOpen: false }),
 
-      openDropdown: () => {
-        set({ isOpen: true });
-      },
-
-      closeDropdown: () => {
-        set({ isOpen: false });
-      },
-
-      getUnreadNotifications: () => {
-        return get().notifications.filter(
-          (notification) => !notification.isRead
-        );
-      },
-
-      getNotificationsByType: (type: string) => {
-        return get().notifications.filter(
-          (notification) => notification.type === type
-        );
-      },
+      // Derived
+      unreadCount: () => get().notifications.filter((n) => !n.isRead).length,
+      getUnreadNotifications: () =>
+        get().notifications.filter((n) => !n.isRead),
+      getNotificationsByType: (type) =>
+        get().notifications.filter((n) => n.type === type),
     }),
     {
       name: "notifications-storage",
       partialize: (state) => ({
         notifications: state.notifications,
-        unreadCount: state.unreadCount,
+        // don’t persist isOpen (UI state) or any computed functions
       }),
+      // Recompute or clean up on rehydrate if you need:
+      onRehydrateStorage: () => (state) => {
+        if (!state) return;
+        // Optional: trim list if older versions stored too many
+        if (state.notifications?.length > MAX_NOTIFICATIONS) {
+          state.notifications = state.notifications.slice(0, MAX_NOTIFICATIONS);
+        }
+      },
     }
   )
 );
 
-// Helper functions for common notification types
+// Tiny helper: request permission when opening the dropdown (call once in UI if you want)
+export async function ensureNotificationPermission() {
+  if (typeof window === "undefined" || !("Notification" in window)) return;
+  if (Notification.permission === "default") {
+    try {
+      await Notification.requestPermission();
+    } catch {}
+  }
+}
+
+// Existing helpers — unchanged API; they’ll now get uuid + ISO createdAt
 export const notificationHelpers = {
   courseEnrollment: (courseTitle: string) => {
     useNotificationsStore.getState().addNotification({
@@ -200,10 +185,8 @@ export const notificationHelpers = {
       message: `You've successfully enrolled in ${courseTitle}`,
       actionUrl: "/student/courses",
       actionLabel: "View Courses",
-      isRead: false, // REMOVE this line if present
     });
   },
-
   paymentSuccess: (amount: number, courseTitle: string) => {
     useNotificationsStore.getState().addNotification({
       type: "success",
@@ -211,10 +194,8 @@ export const notificationHelpers = {
       message: `Payment of ₦${amount} for ${courseTitle} has been processed`,
       actionUrl: "/student/courses",
       actionLabel: "View Courses",
-      isRead: false, // REMOVE this line if present
     });
   },
-
   assignmentDue: (assignmentTitle: string, dueDate: string) => {
     useNotificationsStore.getState().addNotification({
       type: "warning",
@@ -222,10 +203,8 @@ export const notificationHelpers = {
       message: `${assignmentTitle} is due on ${dueDate}`,
       actionUrl: "/student/assignments",
       actionLabel: "View Assignment",
-      isRead: false, // REMOVE this line if present
     });
   },
-
   newMessage: (senderName: string) => {
     useNotificationsStore.getState().addNotification({
       type: "info",
@@ -233,7 +212,6 @@ export const notificationHelpers = {
       message: `You have a new message from ${senderName}`,
       actionUrl: "/messages",
       actionLabel: "View Messages",
-      isRead: false, // REMOVE this line if present
     });
   },
 };

@@ -54,7 +54,7 @@ export default {
     async signIn({ user, account }) {
       if (account?.provider !== "credentials") {
         const existingUser = await getUserByEmail(user.email!);
-
+        console.log({ user });
         if (!existingUser) {
           await onBoardingMail(user.email!, user.name || "");
         }
@@ -71,13 +71,20 @@ export default {
     },
 
     // This jwt callback is essential for the middleware
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger }) {
       if (account && user) {
         token.sub = user.id;
         token.email = user.email;
         token.role = user.role;
       }
 
+      if (trigger === "update" && token.sub) {
+        const userActive = await db.user.findUnique({
+          where: { id: token.sub },
+          select: { role: true },
+        });
+        if (userActive?.role) token.role = userActive.role;
+      }
       // Ensure role persists across token refreshes
       if (!token.role && token.sub) {
         try {

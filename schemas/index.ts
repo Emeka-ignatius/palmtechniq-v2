@@ -81,7 +81,7 @@ export const courseSchema = z.object({
   previewVideo: z.string().optional(),
   tags: z.array(z.string()),
   requirements: z.array(z.string().min(1, "Requirement cannot be empty")),
-  outcomes: z.array(z.string().min(1, "Learning outcome cannot be empty")), // ✅ instead of learningOutcomes
+  outcomes: z.array(z.string().min(1, "Learning outcome cannot be empty")),
   duration: z.preprocess(
     (val) => (val !== "" ? Number(val) : undefined),
     z.number().min(0, "Duration must be non-negative").optional()
@@ -93,7 +93,7 @@ export const courseSchema = z.object({
     .optional(),
   isPublished: z.boolean(),
   allowDiscussions: z.boolean(),
-  certificateEnabled: z.boolean(),
+  certificate: z.boolean().optional(),
   isFlashSale: z.boolean(),
   flashSaleEnd: z.preprocess(
     (val) =>
@@ -102,20 +102,19 @@ export const courseSchema = z.object({
   ) as unknown as z.ZodOptional<z.ZodString>,
   groupBuyingEnabled: z.boolean(),
   groupBuyingDiscount: z.number().min(0).max(1).optional(),
-  certificate: z.boolean(),
   targetAudience: z
     .array(z.string().min(1, "Audience entry cannot be empty"))
-    .optional(), // ✅ added
-  metaTitle: z.string().optional(), // ✅ added
+    .optional(),
+  metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
 });
 
 export const moduleSchema = z.object({
   id: z.string().min(1, "Module ID is required"),
   title: z.string().min(1, "Module title is required"),
-  content: z.string().optional(),
+  content: z.string().nullable().optional(),
   description: z.string().optional(),
-  order: z.number().min(0, "Order must be non-negative"),
+  sortOrder: z.number().min(0, "Order must be non-negative"),
   duration: z.number().min(0, "Duration must be non-negative"),
   isPublished: z.boolean().default(false),
 });
@@ -123,11 +122,11 @@ export const moduleSchema = z.object({
 export const lessonSchema = z.object({
   id: z.string().min(1, "Lesson ID is required"),
   title: z.string().min(1, "Lesson title is required"),
-  type: z.enum(["VIDEO", "TEXT", "QUIZ", "PROJECT", "LIVE"]),
+  lessonType: z.enum(["VIDEO", "TEXT", "QUIZ", "PROJECT", "LIVE"]),
   duration: z.number().min(0, "Duration must be non-negative"),
   content: z.string().optional(),
   videoUrl: z.string().optional(),
-  order: z.number().min(0, "Order must be non-negative"),
+  sortOrder: z.number().min(0, "Order must be non-negative"),
   description: z.string().optional(),
   isPreview: z.boolean().default(false),
 });
