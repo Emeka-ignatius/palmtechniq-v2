@@ -1,3 +1,4 @@
+const isEdge = typeof (globalThis as any).EdgeRuntime === "string";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
@@ -5,7 +6,6 @@ import Github from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import getUserByEmail, { getUserById } from "./data/user";
 import { db } from "./lib/db";
-import { onBoardingMail } from "./lib/mail";
 import { verifyPassword } from "./lib/password";
 import { loginSchema } from "./schemas";
 
@@ -56,6 +56,7 @@ export default {
         const existingUser = await getUserByEmail(user.email!);
         console.log({ user });
         if (!existingUser) {
+          const { onBoardingMail } = await import("./lib/mail");
           await onBoardingMail(user.email!, user.name || "");
         }
 
@@ -78,7 +79,7 @@ export default {
         token.role = user.role;
       }
 
-      if (trigger === "update" && token.sub) {
+      if (!isEdge && trigger === "update" && token.sub) {
         const userActive = await db.user.findUnique({
           where: { id: token.sub },
           select: { role: true },
@@ -86,7 +87,7 @@ export default {
         if (userActive?.role) token.role = userActive.role;
       }
       // Ensure role persists across token refreshes
-      if (!token.role && token.sub) {
+      if (!isEdge && !token.role && token.sub) {
         try {
           const dbUser = await getUserById(token.sub);
           if (dbUser?.role) {
