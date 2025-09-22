@@ -1,13 +1,13 @@
-import bcrypt from "bcryptjs";
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Github from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import getUserByEmail, { getUserById } from "./data/user";
-import { loginSchema } from "./schemas";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "./lib/db";
 import { onBoardingMail } from "./lib/mail";
+import { verifyPassword } from "./lib/password";
+import { loginSchema } from "./schemas";
 
 export default {
   providers: [
@@ -29,7 +29,7 @@ export default {
           const user = await getUserByEmail(email);
           if (!user || !user.password) return null;
 
-          const passwordMatch = await bcrypt.compare(password, user.password);
+          const passwordMatch = await verifyPassword(password, user.password);
 
           if (passwordMatch) return user;
         }

@@ -1,32 +1,33 @@
 "use server";
 
+import { signIn } from "@/auth";
 import { db } from "@/lib/db";
 import {
-  signupSchema,
-  loginSchema,
-  forgotPasswordSchema,
-  resetPasswordSchema,
-} from "@/schemas";
-import {
-  sendVerificationEmail,
   onBoardingMail,
   sendPasswordResetToken,
+  sendVerificationEmail,
 } from "@/lib/mail";
-import { signIn } from "@/auth";
-import bcrypt from "bcryptjs";
+import {
+  forgotPasswordSchema,
+  loginSchema,
+  resetPasswordSchema,
+  signupSchema,
+} from "@/schemas";
 
-import { UserRole } from "@prisma/client";
 import getUserByEmail from "@/data/user";
+import { hashPassword } from "@/lib/password";
+import { UserRole } from "@prisma/client";
+
+import { getPasswordResetTokenByToken } from "@/data/password-reset-token";
+import { getVerificationTokenByToken } from "@/data/verification-token";
+import { rateLimiter, RateLimitError } from "@/lib/rate-limit";
 import {
   generatePasswordResetToken,
   generateverificationToken,
 } from "@/lib/token";
-import z from "zod";
-import { AuthError } from "next-auth";
-import { getVerificationTokenByToken } from "@/data/verification-token";
-import { getPasswordResetTokenByToken } from "@/data/password-reset-token";
-import { rateLimiter, RateLimitError } from "@/lib/rate-limit";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
+import { AuthError } from "next-auth";
+import z from "zod";
 
 // Signup Action
 export async function signup(data: z.infer<typeof signupSchema>) {
@@ -41,7 +42,7 @@ export async function signup(data: z.infer<typeof signupSchema>) {
     const { name, email, phone, password, confirmPassword, terms } =
       validated.data;
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashed = await hashPassword(password);
 
     // Check if user exists
     const existingUser = await getUserByEmail(email);
@@ -57,7 +58,7 @@ export async function signup(data: z.infer<typeof signupSchema>) {
         email: email,
         name: name,
         phone: phone,
-        password: hashedPassword,
+        password: hashed,
         role: "USER" as UserRole,
         verificationToken: verificationToken.token,
       },
@@ -220,11 +221,11 @@ export async function resetPassword(
       return { error: "Email does not exist!" };
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashed = await hashPassword(password);
 
     await db.user.update({
       where: { id: existingUser.id },
-      data: { password: hashedPassword },
+      data: { password: hashed },
     });
 
     await db.passwordResetToken.delete({
