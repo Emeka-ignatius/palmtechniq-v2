@@ -2,11 +2,7 @@
 
 import { signIn } from "@/auth";
 import { db } from "@/lib/db";
-import {
-  onBoardingMail,
-  sendPasswordResetToken,
-  sendVerificationEmail,
-} from "@/lib/mail";
+
 import {
   forgotPasswordSchema,
   loginSchema,
@@ -64,6 +60,7 @@ export async function signup(data: z.infer<typeof signupSchema>) {
       },
     });
 
+    const { sendVerificationEmail } = await import("@/lib/mail");
     // Send verification email
     await sendVerificationEmail(
       verificationToken.email,
@@ -114,6 +111,8 @@ export async function login(
       !existingUser.password
     ) {
       const verificationToken = await generateverificationToken(email);
+
+      const { sendVerificationEmail } = await import("@/lib/mail");
 
       await sendVerificationEmail(
         verificationToken.email,
@@ -174,6 +173,8 @@ export async function forgotPassword(
 
     // Generate reset token
     const resetToken = generatePasswordResetToken(email);
+
+    const { sendPasswordResetToken } = await import("@/lib/mail");
 
     await sendPasswordResetToken(
       (
@@ -273,6 +274,7 @@ export async function verifyEmail(token: string) {
     });
 
     if (existingUser.email && existingUser.name) {
+      const { onBoardingMail } = await import("@/lib/mail");
       await onBoardingMail(existingUser.email, existingUser.name);
     } else {
       if (process.env.NODE_ENV !== "production") {
