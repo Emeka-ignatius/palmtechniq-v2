@@ -1,5 +1,3 @@
-"use server";
-
 export const runtime = "nodejs";
 
 export async function onBoardingMail(email: string, fullName: string) {
