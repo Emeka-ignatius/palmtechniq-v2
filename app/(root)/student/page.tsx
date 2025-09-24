@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Navigation } from "@/components/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useSession } from "next-auth/react";
 import {
   BookOpen,
   Trophy,
@@ -25,106 +26,308 @@ import type { UserRole } from "@/types/user";
 import { generateRandomAvatar } from "@/lib/utils";
 
 export default function StudentDashboard() {
-  const [userRole] = useState<UserRole>("STUDENT");
-  const [userName] = useState("Alex Johnson");
-  const [userAvatar] = useState(generateRandomAvatar());
+  
+// Types
+type StudentData = {
+  level: number;
+  xp: number;
+  xpToNext: number;
+  streak: number;
+  coursesCompleted: number;
+  coursesInProgress: number;
+  totalHours: number;
+  achievements: number;
+  rank: string;
+};
+
+type Course = {
+  id: number;
+  title: string;
+  instructor: string;
+  progress: number;
+  nextLesson: string;
+  timeLeft: string;
+  thumbnail: string;
+  difficulty: string;
+  rating: number;
+};
+
+type Mentorship = {
+  id: number;
+  mentor: string;
+  topic: string;
+  date: string;
+  time: string;
+  duration: number;
+  avatar: string;
+};
+
+type Achievement = {
+  id: number;
+  title: string;
+  description: string;
+  icon: any;
+  color: string;
+  earned: string;
+};
+
+// Placeholder data for first-time users
+const studentDataPlaceholder: StudentData = {
+  level: 1,
+  xp: 0,
+  xpToNext: 100,
+  streak: 0,
+  coursesCompleted: 0,
+  coursesInProgress: 0,
+  totalHours: 0,
+  achievements: 0,
+  rank: "Beginner",
+};
+
+const currentCoursesPlaceholder: Course[] = [
+  {
+    id: 1,
+    title: "Sample Course 1",
+    instructor: "Instructor Name",
+    progress: 0,
+    nextLesson: "Lesson 1",
+    timeLeft: "1h 0m",
+    thumbnail: "/default-avatar.png",
+    difficulty: "Beginner",
+    rating: 5.0,
+  },
+];
+
+const upcomingMentorshipsPlaceholder: Mentorship[] = [
+  {
+    id: 1,
+    mentor: "Mentor Name",
+    topic: "Sample Topic",
+    date: "Today",
+    time: "3:00 PM",
+    duration: 60,
+    avatar: "/default-avatar.png",
+  },
+];
+
+const recentAchievementsPlaceholder: Achievement[] = [
+  {
+    id: 1,
+    title: "First Steps",
+    description: "Started learning journey",
+    icon: Zap,
+    color: "from-yellow-400 to-orange-500",
+    earned: "Today",
+  },
+];
+
+  const { data: session } = useSession();
+
+  // --- Step 1: State initialized with placeholders ---
+  const [studentData, setStudentData] = useState<StudentData>(
+    studentDataPlaceholder
+  );
+  const [currentCourses, setCurrentCourses] = useState<Course[]>(
+    currentCoursesPlaceholder
+  );
+  const [upcomingMentorships, setUpcomingMentorships] = useState<Mentorship[]>(
+    upcomingMentorshipsPlaceholder
+  );
+  const [recentAchievements, setRecentAchievements] = useState<Achievement[]>(
+    recentAchievementsPlaceholder
+  );
+
+  // --- Step 2: Fetch real data after login/enrollment ---
+  useEffect(() => {
+    if (session?.user) {
+      // Example fetch for student stats
+      fetch(`/api/studentData?userId=${session.user.id}`)
+        .then((res) => res.json())
+        .then((data: StudentData) => setStudentData(data))
+        .catch(() => console.log("Using placeholder studentData"));
+
+      // Example fetch for current courses
+      fetch(`/api/currentCourses?userId=${session.user.id}`)
+        .then((res) => res.json())
+        .then((data: Course[]) => setCurrentCourses(data))
+        .catch(() => console.log("Using placeholder currentCourses"));
+
+      // Example fetch for mentorships
+      fetch(`/api/upcomingMentorships?userId=${session.user.id}`)
+        .then((res) => res.json())
+        .then((data: Mentorship[]) => setUpcomingMentorships(data))
+        .catch(() => console.log("Using placeholder mentorships"));
+
+      // Example fetch for achievements
+      fetch(`/api/recentAchievements?userId=${session.user.id}`)
+        .then((res) => res.json())
+        .then((data: Achievement[]) => setRecentAchievements(data))
+        .catch(() => console.log("Using placeholder achievements"));
+    }
+  }, [session]);
+
+  // // --- Step 3: Render UI dynamically ---
+  // return (
+  //   <div className="p-6">
+  //     <h1 className="text-2xl font-bold text-white">
+  //       Welcome back, {session?.user?.name || "Student"}!
+  //     </h1>
+
+  //     {/* Level & Progress */}
+  //     <Card className="glass-card border-white/10 mt-6">
+  //       <CardContent>
+  //         <div className="flex items-center justify-between mb-4">
+  //           <div className="flex items-center gap-4">
+  //             <div className="w-16 h-16 rounded-full bg-gradient-to-r from-neon-blue to-neon-purple flex items-center justify-center">
+  //               <span className="text-2xl font-bold text-white">
+  //                 {studentData.level}
+  //               </span>
+  //             </div>
+  //             <div>
+  //               <h3 className="text-xl font-bold text-white">
+  //                 {studentData.rank}
+  //               </h3>
+  //               <p className="text-gray-400">Level {studentData.level}</p>
+  //             </div>
+  //           </div>
+  //           <div className="text-right">
+  //             <div className="flex items-center gap-2 mb-2">
+  //               <Fire className="w-5 h-5 text-orange-400" />
+  //               <span className="text-white font-semibold">
+  //                 {studentData.streak} day streak
+  //               </span>
+  //             </div>
+  //             <p className="text-gray-400 text-sm">Keep it up!</p>
+  //           </div>
+  //         </div>
+  //         <div className="space-y-2">
+  //           <div className="flex justify-between text-sm">
+  //             <span className="text-gray-400">
+  //               Progress to Level {studentData.level + 1}
+  //             </span>
+  //             <span className="text-white">
+  //               {studentData.xp} / {studentData.xpToNext} XP
+  //             </span>
+  //           </div>
+  //           <Progress
+  //             value={(studentData.xp / studentData.xpToNext) * 100}
+  //             className="h-3"
+  //           />
+  //         </div>
+  //       </CardContent>
+  //     </Card>
+
+  //     {/* You can render currentCourses, upcomingMentorships, recentAchievements similarly */}
+  //   </div>
+  // );
+
+
+  
+  // const [userRole] = useState<UserRole>("STUDENT");
+  // const [userAvatar] = useState(generateRandomAvatar());
+
+   const userName = session?.user?.name || "Student";
 
   // Mock student data
-  const studentData = {
-    level: 12,
-    xp: 2450,
-    xpToNext: 3000,
-    streak: 7,
-    coursesCompleted: 8,
-    coursesInProgress: 3,
-    totalHours: 124,
-    achievements: 15,
-    rank: "Advanced Learner",
-  };
 
-  const currentCourses = [
-    {
-      id: 1,
-      title: "Advanced React Patterns",
-      instructor: "Sarah Chen",
-      progress: 68,
-      nextLesson: "Custom Hooks Deep Dive",
-      timeLeft: "2h 30m",
-      thumbnail: generateRandomAvatar(),
-      difficulty: "Advanced",
-      rating: 4.9,
-    },
-    {
-      id: 2,
-      title: "Node.js Backend Development",
-      instructor: "Mike Rodriguez",
-      progress: 34,
-      nextLesson: "Express.js Fundamentals",
-      timeLeft: "4h 15m",
-      thumbnail: generateRandomAvatar(),
-      difficulty: "Intermediate",
-      rating: 4.8,
-    },
-    {
-      id: 3,
-      title: "Python Machine Learning",
-      instructor: "Dr. Emily Watson",
-      progress: 12,
-      nextLesson: "Data Preprocessing",
-      timeLeft: "8h 45m",
-      thumbnail: generateRandomAvatar(),
-      difficulty: "Advanced",
-      rating: 4.9,
-    },
-  ];
+  
+  // const studentData = {
+  //   level: 12,
+  //   xp: 2450,
+  //   xpToNext: 3000,
+  //   streak: 7,
+  //   coursesCompleted: 8,
+  //   coursesInProgress: 3,
+  //   totalHours: 124,
+  //   achievements: 15,
+  //   rank: "Advanced Learner",
+  // };
 
-  const upcomingMentorships = [
-    {
-      id: 1,
-      mentor: "Sarah Chen",
-      topic: "React Performance Optimization",
-      date: "Today",
-      time: "3:00 PM",
-      duration: 60,
-      avatar: generateRandomAvatar(),
-    },
-    {
-      id: 2,
-      mentor: "Mike Rodriguez",
-      topic: "API Design Best Practices",
-      date: "Tomorrow",
-      time: "10:00 AM",
-      duration: 45,
-      avatar: generateRandomAvatar(),
-    },
-  ];
+  // const currentCourses = [
+  //   {
+  //     id: 1,
+  //     title: "Advanced React Patterns",
+  //     instructor: "Sarah Chen",
+  //     progress: 68,
+  //     nextLesson: "Custom Hooks Deep Dive",
+  //     timeLeft: "2h 30m",
+  //     thumbnail: generateRandomAvatar(),
+  //     difficulty: "Advanced",
+  //     rating: 4.9,
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "Node.js Backend Development",
+  //     instructor: "Mike Rodriguez",
+  //     progress: 34,
+  //     nextLesson: "Express.js Fundamentals",
+  //     timeLeft: "4h 15m",
+  //     thumbnail: generateRandomAvatar(),
+  //     difficulty: "Intermediate",
+  //     rating: 4.8,
+  //   },
+  //   {
+  //     id: 3,
+  //     title: "Python Machine Learning",
+  //     instructor: "Dr. Emily Watson",
+  //     progress: 12,
+  //     nextLesson: "Data Preprocessing",
+  //     timeLeft: "8h 45m",
+  //     thumbnail: generateRandomAvatar(),
+  //     difficulty: "Advanced",
+  //     rating: 4.9,
+  //   },
+  // ];
 
-  const recentAchievements = [
-    {
-      id: 1,
-      title: "Speed Learner",
-      description: "Completed 3 lessons in one day",
-      icon: Zap,
-      color: "from-yellow-400 to-orange-500",
-      earned: "2 days ago",
-    },
-    {
-      id: 2,
-      title: "Streak Master",
-      description: "7-day learning streak",
-      icon: Fire,
-      color: "from-red-500 to-pink-500",
-      earned: "Today",
-    },
-    {
-      id: 3,
-      title: "Code Warrior",
-      description: "Completed 50 coding challenges",
-      icon: Trophy,
-      color: "from-purple-500 to-indigo-500",
-      earned: "1 week ago",
-    },
-  ];
+  // const upcomingMentorships = [
+  //   {
+  //     id: 1,
+  //     mentor: "Sarah Chen",
+  //     topic: "React Performance Optimization",
+  //     date: "Today",
+  //     time: "3:00 PM",
+  //     duration: 60,
+  //     avatar: generateRandomAvatar(),
+  //   },
+  //   {
+  //     id: 2,
+  //     mentor: "Mike Rodriguez",
+  //     topic: "API Design Best Practices",
+  //     date: "Tomorrow",
+  //     time: "10:00 AM",
+  //     duration: 45,
+  //     avatar: generateRandomAvatar(),
+  //   },
+  // ];
+
+  // const recentAchievements = [
+  //   {
+  //     id: 1,
+  //     title: "Speed Learner",
+  //     description: "Completed 3 lessons in one day",
+  //     icon: Zap,
+  //     color: "from-yellow-400 to-orange-500",
+  //     earned: "2 days ago",
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "Streak Master",
+  //     description: "7-day learning streak",
+  //     icon: Fire,
+  //     color: "from-red-500 to-pink-500",
+  //     earned: "Today",
+  //   },
+  //   {
+  //     id: 3,
+  //     title: "Code Warrior",
+  //     description: "Completed 50 coding challenges",
+  //     icon: Trophy,
+  //     color: "from-purple-500 to-indigo-500",
+  //     earned: "1 week ago",
+  //   },
+  // ];
+
+
 
   const StatCard = ({ icon: Icon, title, value, subtitle, color }: any) => (
     <motion.div whileHover={{ scale: 1.05, rotateY: 5 }} className="group">
@@ -177,7 +380,7 @@ export default function StudentDashboard() {
             className="text-center mb-12">
             <h1 className="text-5xl md:text-6xl font-bold mb-4">
               <span className="text-white">Welcome back,</span>{" "}
-              <span className="text-gradient">Alex!</span>
+              <span className="text-gradient">{userName}!</span>
             </h1>
             <p className="text-xl text-gray-300">
               Ready to continue your learning journey?
