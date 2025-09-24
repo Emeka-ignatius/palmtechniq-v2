@@ -26,100 +26,100 @@ import type { UserRole } from "@/types/user";
 import { generateRandomAvatar } from "@/lib/utils";
 
 export default function StudentDashboard() {
-  
-// Types
-type StudentData = {
-  level: number;
-  xp: number;
-  xpToNext: number;
-  streak: number;
-  coursesCompleted: number;
-  coursesInProgress: number;
-  totalHours: number;
-  achievements: number;
-  rank: string;
-};
 
-type Course = {
-  id: number;
-  title: string;
-  instructor: string;
-  progress: number;
-  nextLesson: string;
-  timeLeft: string;
-  thumbnail: string;
-  difficulty: string;
-  rating: number;
-};
+  // Types
+  type StudentData = {
+    level: number;
+    xp: number;
+    xpToNext: number;
+    streak: number;
+    coursesCompleted: number;
+    coursesInProgress: number;
+    totalHours: number;
+    achievements: number;
+    rank: string;
+  };
 
-type Mentorship = {
-  id: number;
-  mentor: string;
-  topic: string;
-  date: string;
-  time: string;
-  duration: number;
-  avatar: string;
-};
+  type Course = {
+    id: number;
+    title: string;
+    instructor: string;
+    progress: number;
+    nextLesson: string;
+    timeLeft: string;
+    thumbnail: string;
+    difficulty: string;
+    rating: number;
+  };
 
-type Achievement = {
-  id: number;
-  title: string;
-  description: string;
-  icon: any;
-  color: string;
-  earned: string;
-};
+  type Mentorship = {
+    id: number;
+    mentor: string;
+    topic: string;
+    date: string;
+    time: string;
+    duration: number;
+    avatar: string;
+  };
 
-// Placeholder data for first-time users
-const studentDataPlaceholder: StudentData = {
-  level: 1,
-  xp: 0,
-  xpToNext: 100,
-  streak: 0,
-  coursesCompleted: 0,
-  coursesInProgress: 0,
-  totalHours: 0,
-  achievements: 0,
-  rank: "Beginner",
-};
+  type Achievement = {
+    id: number;
+    title: string;
+    description: string;
+    icon: any;
+    color: string;
+    earned: string;
+  };
 
-const currentCoursesPlaceholder: Course[] = [
-  {
-    id: 1,
-    title: "Sample Course 1",
-    instructor: "Instructor Name",
-    progress: 0,
-    nextLesson: "Lesson 1",
-    timeLeft: "1h 0m",
-    thumbnail: "/default-avatar.png",
-    difficulty: "Beginner",
-    rating: 5.0,
-  },
-];
+  // Placeholder data for first-time users
+  const studentDataPlaceholder: StudentData = {
+    level: 1,
+    xp: 0,
+    xpToNext: 100,
+    streak: 0,
+    coursesCompleted: 0,
+    coursesInProgress: 0,
+    totalHours: 0,
+    achievements: 0,
+    rank: "Beginner",
+  };
 
-const upcomingMentorshipsPlaceholder: Mentorship[] = [
-  {
-    id: 1,
-    mentor: "Mentor Name",
-    topic: "Sample Topic",
-    date: "Today",
-    time: "3:00 PM",
-    duration: 60,
-    avatar: "/default-avatar.png",
-  },
-];
+  const currentCoursesPlaceholder: Course[] = [
+    {
+      id: 1,
+      title: "Sample Course 1",
+      instructor: "Instructor Name",
+      progress: 0,
+      nextLesson: "Lesson 1",
+      timeLeft: "1h 0m",
+      thumbnail: "/default-avatar.png",
+      difficulty: "Beginner",
+      rating: 5.0,
+    },
+  ];
 
-const recentAchievementsPlaceholder: Achievement[] = [
-  {
-    id: 1,
-    title: "First Steps",
-    description: "Started learning journey",
-    icon: Zap,
-    color: "from-yellow-400 to-orange-500",
-    earned: "Today",
-  },
-];
+  const upcomingMentorshipsPlaceholder: Mentorship[] = [
+    {
+      id: 1,
+      mentor: "Mentor Name",
+      topic: "Sample Topic",
+      date: "Today",
+      time: "3:00 PM",
+      duration: 60,
+      avatar: "/default-avatar.png",
+    },
+  ];
+
+  const recentAchievementsPlaceholder: Achievement[] = [
+    {
+      id: 1,
+      title: "First Steps",
+      description: "Started learning journey",
+      icon: Zap,
+      color: "from-yellow-400 to-orange-500",
+      earned: "Today",
+    },
+  ];
 
   const { data: session } = useSession();
 
@@ -166,71 +166,33 @@ const recentAchievementsPlaceholder: Achievement[] = [
     }
   }, [session]);
 
-  // // --- Step 3: Render UI dynamically ---
-  // return (
-  //   <div className="p-6">
-  //     <h1 className="text-2xl font-bold text-white">
-  //       Welcome back, {session?.user?.name || "Student"}!
-  //     </h1>
 
-  //     {/* Level & Progress */}
-  //     <Card className="glass-card border-white/10 mt-6">
-  //       <CardContent>
-  //         <div className="flex items-center justify-between mb-4">
-  //           <div className="flex items-center gap-4">
-  //             <div className="w-16 h-16 rounded-full bg-gradient-to-r from-neon-blue to-neon-purple flex items-center justify-center">
-  //               <span className="text-2xl font-bold text-white">
-  //                 {studentData.level}
-  //               </span>
-  //             </div>
-  //             <div>
-  //               <h3 className="text-xl font-bold text-white">
-  //                 {studentData.rank}
-  //               </h3>
-  //               <p className="text-gray-400">Level {studentData.level}</p>
-  //             </div>
-  //           </div>
-  //           <div className="text-right">
-  //             <div className="flex items-center gap-2 mb-2">
-  //               <Fire className="w-5 h-5 text-orange-400" />
-  //               <span className="text-white font-semibold">
-  //                 {studentData.streak} day streak
-  //               </span>
-  //             </div>
-  //             <p className="text-gray-400 text-sm">Keep it up!</p>
-  //           </div>
-  //         </div>
-  //         <div className="space-y-2">
-  //           <div className="flex justify-between text-sm">
-  //             <span className="text-gray-400">
-  //               Progress to Level {studentData.level + 1}
-  //             </span>
-  //             <span className="text-white">
-  //               {studentData.xp} / {studentData.xpToNext} XP
-  //             </span>
-  //           </div>
-  //           <Progress
-  //             value={(studentData.xp / studentData.xpToNext) * 100}
-  //             className="h-3"
-  //           />
-  //         </div>
-  //       </CardContent>
-  //     </Card>
-
-  //     {/* You can render currentCourses, upcomingMentorships, recentAchievements similarly */}
-  //   </div>
-  // );
-
-
-  
   // const [userRole] = useState<UserRole>("STUDENT");
   // const [userAvatar] = useState(generateRandomAvatar());
 
-   const userName = session?.user?.name || "Student";
+  const userName = session?.user?.name || "Student";
 
+  // count courses considered "in progress"
+
+  // count courses considered "in progress"
+  const coursesInProgressCount = Array.isArray(currentCourses)
+    ? currentCourses.filter((c) => c.progress < 100).length
+    : 0;
+
+  const learningProgress = studentData.totalHours;
+
+  const achievementProgress = recentAchievements.filter((a) => a.earned.includes("daay") || a.earned.includes("week") );
+
+  const completionRate = (studentData.coursesCompleted ?? 0) + (studentData.coursesInProgress ?? 0) > 0
+  ? Math.round(
+      ((studentData.coursesCompleted ?? 0) /
+        ((studentData.coursesCompleted ?? 0) + (studentData.coursesInProgress ?? 0))) * 100
+    )
+  : 0;
+  
   // Mock student data
 
-  
+
   // const studentData = {
   //   level: 12,
   //   xp: 2450,
@@ -489,28 +451,28 @@ const recentAchievementsPlaceholder: Achievement[] = [
               icon={BookOpen}
               title="Courses Completed"
               value={studentData.coursesCompleted}
-              subtitle="3 in progress"
+              subtitle={`${coursesInProgressCount} in progress`}
               color="from-neon-blue to-cyan-400"
             />
             <StatCard
               icon={Clock}
               title="Learning Hours"
-              value={`₦{studentData.totalHours}h`}
-              subtitle="This month: 24h"
+              value={`${studentData.totalHours}h`}
+              subtitle={`This month: ${learningProgress}h`}
               color="from-neon-green to-emerald-400"
             />
             <StatCard
               icon={Trophy}
               title="Achievements"
               value={studentData.achievements}
-              subtitle="3 this week"
+              subtitle={`${achievementProgress.length} this week`}
               color="from-neon-orange to-yellow-400"
             />
             <StatCard
               icon={Target}
               title="Completion Rate"
-              value="94%"
-              subtitle="Above average"
+              value={`${completionRate}%`}
+              subtitle={completionRate >= 80 ? "Above average" : "Keep going!"}
               color="from-neon-purple to-pink-400"
             />
           </div>
