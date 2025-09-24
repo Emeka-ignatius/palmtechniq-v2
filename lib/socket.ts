@@ -16,7 +16,7 @@ export function initIO(server: HttpServer) {
     const io = new IOServer(server, {
       path: "/api/socket",
       cors: {
-        origin: process.env.NEXT_PUBLIC_APP_URL || "*",
+        origin: process.env.NEXT_PUBLIC_URL || "*",
         credentials: true,
       },
     });
@@ -24,10 +24,10 @@ export function initIO(server: HttpServer) {
     io.use(async (socket, next) => {
       try {
         const cookie = socket.request.headers.cookie ?? "";
-        const req = socket.request as NextApiRequest;
         const token = await getToken({
           req: { headers: { cookie } },
           secret: process.env.AUTH_SECRET,
+          cookieName: "authjs.session-token",
         });
         if (!token?.sub) return next(new Error("Unauthorized"));
 
@@ -51,7 +51,7 @@ export function initIO(server: HttpServer) {
       socket.join(`role:${role}`);
       try {
         const enrollments = await db.enrollment.findMany({
-          where: { userId },
+          where: { userId, status: "ACTIVE" },
           select: { courseId: true },
         });
         enrollments.forEach(({ courseId }) => {

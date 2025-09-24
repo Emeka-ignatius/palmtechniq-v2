@@ -1,29 +1,27 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Navigation } from "@/components/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSession } from "next-auth/react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { generateRandomAvatar } from "@/lib/utils";
+import { motion } from "framer-motion";
 import {
   BookOpen,
-  Trophy,
-  Clock,
-  Target,
-  Play,
-  Calendar,
-  Zap,
-  FlameIcon as Fire,
   Brain,
+  Calendar,
   CheckCircle,
+  Clock,
+  FlameIcon as Fire,
+  Play,
   Plus,
+  Target,
+  Trophy,
+  Zap,
 } from "lucide-react";
-import type { UserRole } from "@/types/user";
-import { generateRandomAvatar } from "@/lib/utils";
 
 export default function StudentDashboard() {
 
@@ -304,12 +302,12 @@ export default function StudentDashboard() {
               )}
             </div>
             <div
-              className={`w-16 h-16 rounded-2xl bg-gradient-to-r ₦{color} p-4 group-hover:scale-110 transition-transform duration-300`}>
+              className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${color} p-4 group-hover:scale-110 transition-transform duration-300`}>
               <Icon className="w-full h-full text-white" />
             </div>
           </div>
           <motion.div
-            className={`absolute inset-0 bg-gradient-to-r ₦{color} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}
+            className={`absolute inset-0 bg-gradient-to-r ${color} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}
           />
         </CardContent>
       </Card>
@@ -429,7 +427,7 @@ export default function StudentDashboard() {
             ].map((action, index) => (
               <motion.button
                 key={action.label}
-                className={`flex items-center px-6 py-3 rounded-2xl bg-gradient-to-r ₦{action.color} text-white font-semibold hover-glow group`}
+                className={`flex items-center px-6 py-3 rounded-2xl bg-gradient-to-r ${action.color} text-white font-semibold hover-glow group`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 initial={{ opacity: 0, y: 20 }}
@@ -530,7 +528,7 @@ export default function StudentDashboard() {
                               />
                             </div>
                             <Badge
-                              className={`text-xs ₦{
+                              className={`text-xs ${
                                 course.difficulty === "Advanced"
                                   ? "bg-red-500/20 text-red-400 border-red-500/30"
                                   : course.difficulty === "Intermediate"
@@ -583,7 +581,7 @@ export default function StudentDashboard() {
                         transition={{ duration: 0.5, delay: index * 0.1 }}
                         className="flex items-center space-x-4 p-4 bg-white/5 rounded-lg">
                         <div
-                          className={`w-12 h-12 rounded-full bg-gradient-to-r ₦{achievement.color} flex items-center justify-center`}>
+                          className={`w-12 h-12 rounded-full bg-gradient-to-r ${achievement.color} flex items-center justify-center`}>
                           <achievement.icon className="w-6 h-6 text-white" />
                         </div>
                         <div className="flex-1">

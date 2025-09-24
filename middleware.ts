@@ -59,14 +59,7 @@ export default auth((req) => {
         : DEFAULT_LOGIN_REDIRECT;
       console.log("Redirecting from auth route to:", redirectPath);
 
-      let callbackUrl = nextUrl.pathname;
-      if (nextUrl.search) {
-        callbackUrl += nextUrl.search;
-      }
-      const encodedCallbackUrl = encodeURIComponent(callbackUrl);
-      return Response.redirect(
-        new URL(`/login?callbackUrl=${encodedCallbackUrl}`, nextUrl)
-      );
+      return Response.redirect(new URL(redirectPath, nextUrl));
     }
     return; // Allow access to auth routes for non-logged-in users
   }

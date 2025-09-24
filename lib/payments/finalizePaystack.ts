@@ -75,10 +75,12 @@ export async function finalizePaystackByReference(reference: string) {
     if (io) {
       io.to(`user:${tx.userId}`).emit("auth:refresh");
 
-      if (tx.courseId) {
-        const sockets = await io.in(`user:${tx.userId}`).fetchSockets();
-        sockets.forEach((s) => s.join(`course:${tx.courseId}`));
-      }
+      const sockets = await io.in(`user:${tx.userId}`).fetchSockets();
+      sockets.forEach((s) => {
+        s.leave(`role:USER`);
+        s.join(`role:STUDENT`);
+        if (tx.courseId) s.join(`course:${tx.courseId}`);
+      });
     }
   } catch (error) {
     console.warn("socket post-finalize error", error);
