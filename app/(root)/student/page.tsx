@@ -1,13 +1,14 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { generateRandomAvatar } from "@/lib/utils";
-import type { UserRole } from "@/types/user";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { Navigation } from "@/components/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useSession } from "next-auth/react";
 import {
   BookOpen,
   Brain,
@@ -21,109 +22,274 @@ import {
   Trophy,
   Zap,
 } from "lucide-react";
-import { useState } from "react";
+import { generateRandomAvatar } from "@/lib/utils";
 
 export default function StudentDashboard() {
-  const [userRole] = useState<UserRole>("STUDENT");
-  const [userName] = useState("Alex Johnson");
-  const [userAvatar] = useState(generateRandomAvatar());
-
-  // Mock student data
-  const studentData = {
-    level: 12,
-    xp: 2450,
-    xpToNext: 3000,
-    streak: 7,
-    coursesCompleted: 8,
-    coursesInProgress: 3,
-    totalHours: 124,
-    achievements: 15,
-    rank: "Advanced Learner",
+  // Types
+  type StudentData = {
+    level: number;
+    xp: number;
+    xpToNext: number;
+    streak: number;
+    coursesCompleted: number;
+    coursesInProgress: number;
+    totalHours: number;
+    achievements: number;
+    rank: string;
   };
 
-  const currentCourses = [
+  type Course = {
+    id: number;
+    title: string;
+    instructor: string;
+    progress: number;
+    nextLesson: string;
+    timeLeft: string;
+    thumbnail: string;
+    difficulty: string;
+    rating: number;
+  };
+
+  type Mentorship = {
+    id: number;
+    mentor: string;
+    topic: string;
+    date: string;
+    time: string;
+    duration: number;
+    avatar: string;
+  };
+
+  type Achievement = {
+    id: number;
+    title: string;
+    description: string;
+    icon: any;
+    color: string;
+    earned: string;
+  };
+
+  // Placeholder data for first-time users
+  const studentDataPlaceholder: StudentData = {
+    level: 1,
+    xp: 0,
+    xpToNext: 100,
+    streak: 0,
+    coursesCompleted: 0,
+    coursesInProgress: 0,
+    totalHours: 0,
+    achievements: 0,
+    rank: "Beginner",
+  };
+
+  const currentCoursesPlaceholder: Course[] = [
     {
       id: 1,
-      title: "Advanced React Patterns",
-      instructor: "Sarah Chen",
-      progress: 68,
-      nextLesson: "Custom Hooks Deep Dive",
-      timeLeft: "2h 30m",
-      thumbnail: generateRandomAvatar(),
-      difficulty: "Advanced",
-      rating: 4.9,
-    },
-    {
-      id: 2,
-      title: "Node.js Backend Development",
-      instructor: "Mike Rodriguez",
-      progress: 34,
-      nextLesson: "Express.js Fundamentals",
-      timeLeft: "4h 15m",
-      thumbnail: generateRandomAvatar(),
-      difficulty: "Intermediate",
-      rating: 4.8,
-    },
-    {
-      id: 3,
-      title: "Python Machine Learning",
-      instructor: "Dr. Emily Watson",
-      progress: 12,
-      nextLesson: "Data Preprocessing",
-      timeLeft: "8h 45m",
-      thumbnail: generateRandomAvatar(),
-      difficulty: "Advanced",
-      rating: 4.9,
+      title: "Sample Course 1",
+      instructor: "Instructor Name",
+      progress: 0,
+      nextLesson: "Lesson 1",
+      timeLeft: "1h 0m",
+      thumbnail: "/default-avatar.png",
+      difficulty: "Beginner",
+      rating: 5.0,
     },
   ];
 
-  const upcomingMentorships = [
+  const upcomingMentorshipsPlaceholder: Mentorship[] = [
     {
       id: 1,
-      mentor: "Sarah Chen",
-      topic: "React Performance Optimization",
+      mentor: "Mentor Name",
+      topic: "Sample Topic",
       date: "Today",
       time: "3:00 PM",
       duration: 60,
-      avatar: generateRandomAvatar(),
-    },
-    {
-      id: 2,
-      mentor: "Mike Rodriguez",
-      topic: "API Design Best Practices",
-      date: "Tomorrow",
-      time: "10:00 AM",
-      duration: 45,
-      avatar: generateRandomAvatar(),
+      avatar: "/default-avatar.png",
     },
   ];
 
-  const recentAchievements = [
+  const recentAchievementsPlaceholder: Achievement[] = [
     {
       id: 1,
-      title: "Speed Learner",
-      description: "Completed 3 lessons in one day",
+      title: "First Steps",
+      description: "Started learning journey",
       icon: Zap,
       color: "from-yellow-400 to-orange-500",
-      earned: "2 days ago",
-    },
-    {
-      id: 2,
-      title: "Streak Master",
-      description: "7-day learning streak",
-      icon: Fire,
-      color: "from-red-500 to-pink-500",
       earned: "Today",
     },
-    {
-      id: 3,
-      title: "Code Warrior",
-      description: "Completed 50 coding challenges",
-      icon: Trophy,
-      color: "from-purple-500 to-indigo-500",
-      earned: "1 week ago",
-    },
   ];
+
+  const { data: session } = useSession();
+
+  // --- Step 1: State initialized with placeholders ---
+  const [studentData, setStudentData] = useState<StudentData>(
+    studentDataPlaceholder
+  );
+  const [currentCourses, setCurrentCourses] = useState<Course[]>(
+    currentCoursesPlaceholder
+  );
+  const [upcomingMentorships, setUpcomingMentorships] = useState<Mentorship[]>(
+    upcomingMentorshipsPlaceholder
+  );
+  const [recentAchievements, setRecentAchievements] = useState<Achievement[]>(
+    recentAchievementsPlaceholder
+  );
+
+  // --- Step 2: Fetch real data after login/enrollment ---
+  useEffect(() => {
+    if (session?.user) {
+      // Example fetch for student stats
+      fetch(`/api/studentData?userId=${session.user.id}`)
+        .then((res) => res.json())
+        .then((data: StudentData) => setStudentData(data))
+        .catch(() => console.log("Using placeholder studentData"));
+
+      // Example fetch for current courses
+      fetch(`/api/currentCourses?userId=${session.user.id}`)
+        .then((res) => res.json())
+        .then((data: Course[]) => setCurrentCourses(data))
+        .catch(() => console.log("Using placeholder currentCourses"));
+
+      // Example fetch for mentorships
+      fetch(`/api/upcomingMentorships?userId=${session.user.id}`)
+        .then((res) => res.json())
+        .then((data: Mentorship[]) => setUpcomingMentorships(data))
+        .catch(() => console.log("Using placeholder mentorships"));
+
+      // Example fetch for achievements
+      fetch(`/api/recentAchievements?userId=${session.user.id}`)
+        .then((res) => res.json())
+        .then((data: Achievement[]) => setRecentAchievements(data))
+        .catch(() => console.log("Using placeholder achievements"));
+    }
+  }, [session]);
+
+  // const [userRole] = useState<UserRole>("STUDENT");
+  // const [userAvatar] = useState(generateRandomAvatar());
+
+  const userName = session?.user?.name || "Student";
+
+  // count courses considered "in progress"
+
+  // count courses considered "in progress"
+  const coursesInProgressCount = Array.isArray(currentCourses)
+    ? currentCourses.filter((c) => c.progress < 100).length
+    : 0;
+
+  const learningProgress = studentData.totalHours;
+
+  const achievementProgress = recentAchievements.filter(
+    (a) => a.earned.includes("daay") || a.earned.includes("week")
+  );
+
+  const completionRate =
+    (studentData.coursesCompleted ?? 0) + (studentData.coursesInProgress ?? 0) >
+    0
+      ? Math.round(
+          ((studentData.coursesCompleted ?? 0) /
+            ((studentData.coursesCompleted ?? 0) +
+              (studentData.coursesInProgress ?? 0))) *
+            100
+        )
+      : 0;
+
+  // Mock student data
+
+  // const studentData = {
+  //   level: 12,
+  //   xp: 2450,
+  //   xpToNext: 3000,
+  //   streak: 7,
+  //   coursesCompleted: 8,
+  //   coursesInProgress: 3,
+  //   totalHours: 124,
+  //   achievements: 15,
+  //   rank: "Advanced Learner",
+  // };
+
+  // const currentCourses = [
+  //   {
+  //     id: 1,
+  //     title: "Advanced React Patterns",
+  //     instructor: "Sarah Chen",
+  //     progress: 68,
+  //     nextLesson: "Custom Hooks Deep Dive",
+  //     timeLeft: "2h 30m",
+  //     thumbnail: generateRandomAvatar(),
+  //     difficulty: "Advanced",
+  //     rating: 4.9,
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "Node.js Backend Development",
+  //     instructor: "Mike Rodriguez",
+  //     progress: 34,
+  //     nextLesson: "Express.js Fundamentals",
+  //     timeLeft: "4h 15m",
+  //     thumbnail: generateRandomAvatar(),
+  //     difficulty: "Intermediate",
+  //     rating: 4.8,
+  //   },
+  //   {
+  //     id: 3,
+  //     title: "Python Machine Learning",
+  //     instructor: "Dr. Emily Watson",
+  //     progress: 12,
+  //     nextLesson: "Data Preprocessing",
+  //     timeLeft: "8h 45m",
+  //     thumbnail: generateRandomAvatar(),
+  //     difficulty: "Advanced",
+  //     rating: 4.9,
+  //   },
+  // ];
+
+  // const upcomingMentorships = [
+  //   {
+  //     id: 1,
+  //     mentor: "Sarah Chen",
+  //     topic: "React Performance Optimization",
+  //     date: "Today",
+  //     time: "3:00 PM",
+  //     duration: 60,
+  //     avatar: generateRandomAvatar(),
+  //   },
+  //   {
+  //     id: 2,
+  //     mentor: "Mike Rodriguez",
+  //     topic: "API Design Best Practices",
+  //     date: "Tomorrow",
+  //     time: "10:00 AM",
+  //     duration: 45,
+  //     avatar: generateRandomAvatar(),
+  //   },
+  // ];
+
+  // const recentAchievements = [
+  //   {
+  //     id: 1,
+  //     title: "Speed Learner",
+  //     description: "Completed 3 lessons in one day",
+  //     icon: Zap,
+  //     color: "from-yellow-400 to-orange-500",
+  //     earned: "2 days ago",
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "Streak Master",
+  //     description: "7-day learning streak",
+  //     icon: Fire,
+  //     color: "from-red-500 to-pink-500",
+  //     earned: "Today",
+  //   },
+  //   {
+  //     id: 3,
+  //     title: "Code Warrior",
+  //     description: "Completed 50 coding challenges",
+  //     icon: Trophy,
+  //     color: "from-purple-500 to-indigo-500",
+  //     earned: "1 week ago",
+  //   },
+  // ];
 
   const StatCard = ({ icon: Icon, title, value, subtitle, color }: any) => (
     <motion.div whileHover={{ scale: 1.05, rotateY: 5 }} className="group">
@@ -176,7 +342,7 @@ export default function StudentDashboard() {
             className="text-center mb-12">
             <h1 className="text-5xl md:text-6xl font-bold mb-4">
               <span className="text-white">Welcome back,</span>{" "}
-              <span className="text-gradient">Alex!</span>
+              <span className="text-gradient">{userName}!</span>
             </h1>
             <p className="text-xl text-gray-300">
               Ready to continue your learning journey?
@@ -285,28 +451,28 @@ export default function StudentDashboard() {
               icon={BookOpen}
               title="Courses Completed"
               value={studentData.coursesCompleted}
-              subtitle="3 in progress"
+              subtitle={`${coursesInProgressCount} in progress`}
               color="from-neon-blue to-cyan-400"
             />
             <StatCard
               icon={Clock}
               title="Learning Hours"
               value={`${studentData.totalHours}h`}
-              subtitle="This month: 24h"
+              subtitle={`This month: ${learningProgress}h`}
               color="from-neon-green to-emerald-400"
             />
             <StatCard
               icon={Trophy}
               title="Achievements"
               value={studentData.achievements}
-              subtitle="3 this week"
+              subtitle={`${achievementProgress.length} this week`}
               color="from-neon-orange to-yellow-400"
             />
             <StatCard
               icon={Target}
               title="Completion Rate"
-              value="94%"
-              subtitle="Above average"
+              value={`${completionRate}%`}
+              subtitle={completionRate >= 80 ? "Above average" : "Keep going!"}
               color="from-neon-purple to-pink-400"
             />
           </div>
