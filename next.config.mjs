@@ -9,6 +9,28 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-}
 
-export default nextConfig
+  webpack: (config, { isServer, nextRuntime }) => {
+    const isEdge = nextRuntime === "edge";
+    if (!isServer || isEdge) {
+      config.resolve = config.resolve || {};
+      config.resolve.alias = {
+        ...(config.resolve.alias || {}),
+
+        // Your server-only files
+        "@/lib/db": false,
+        "@/lib/mail": false,
+        "@/lib/password": false,
+
+        // Node-only deps that often get pulled in transitively
+        resend: false,
+        "@react-email/render": false,
+        fs: false,
+        path: false,
+      };
+    }
+    return config;
+  },
+};
+
+export default nextConfig;
