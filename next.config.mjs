@@ -25,6 +25,8 @@ const nextConfig = {
         // Node-only deps that often get pulled in transitively
         resend: false,
         "@react-email/render": false,
+        "@react-email/components": false,
+        "react-email": false,
         fs: false,
         path: false,
       };
